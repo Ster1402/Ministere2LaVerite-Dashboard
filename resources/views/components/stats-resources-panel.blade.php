@@ -1,0 +1,1 @@
+<x-stats-panel title="{{ __('Statistiques des ressources') }}" slug="ressources" :statItems="$stats" />
