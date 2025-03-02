@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class TableSectors extends Component
+class TableSubsectors extends Component
 {
     /**
      * Create a new component instance.
@@ -22,13 +22,13 @@ class TableSectors extends Component
      */
     public function render(): View|Closure|string
     {
-        $data = Sector::whereDoesntHave('master', function ($query) {
-            $query->where('id', '>=', 0);
+        $data = Sector::whereHas('master', function ($query) {
+            $query->where('id', '>', 0);
         })
             ->filter(request(['search']))
             ->paginate(10, ['*'], 'sectorsPage')
             ->withQueryString();
 
-        return view('components.table-sectors', compact('data'));
+        return view('components.table-subsectors', compact('data'));
     }
 }

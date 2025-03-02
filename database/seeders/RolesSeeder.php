@@ -89,6 +89,22 @@ class RolesSeeder extends Seeder
             ]);
         }
 
+        if (Roles::where('name', '=', Roles::$SECTOR_MANAGER)->doesntExist()) {
+            Roles::create([
+                'name' => Roles::$SECTOR_MANAGER,
+                'displayName' => 'Responsable des secteurs',
+                'description' => 'Gérant des secteurs dans la plateforme',
+            ]);
+        }
+
+        if (Roles::where('name', '=', Roles::$SUBSECTOR_ADMIN)->doesntExist()) {
+            Roles::create([
+                'name' => Roles::$SUBSECTOR_ADMIN,
+                'displayName' => 'Responsable des sous-secteurs',
+                'description' => 'Administrateur des sous-secteurs dans la plateforme',
+            ]);
+        }
+
         \DB::commit();
     }
 }

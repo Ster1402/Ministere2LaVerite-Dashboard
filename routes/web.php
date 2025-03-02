@@ -25,6 +25,15 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    // Authenticated routes
+
+});
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
 
     Route::get('/storage-link', function () {
         Artisan::Call('storage:unlink');
@@ -40,6 +49,10 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 
+    Route::get('/journal', function () {
+        return view('journal');
+    })->name('journal');
+
     Route::get('/profile', function () {
         return view('users.show', ['user' => Auth::user()]);
     })->name('profile');
@@ -53,6 +66,7 @@ Route::middleware([
     Route::resource('events', App\Http\Controllers\EventController::class);
     Route::resource('groups', App\Http\Controllers\GroupController::class);
     Route::resource('sectors', App\Http\Controllers\SectorController::class);
+    Route::resource('subsectors', App\Http\Controllers\SubsectorController::class);
     Route::resource('messages', App\Http\Controllers\MessageController::class);
     Route::resource('resources', App\Http\Controllers\ResourceController::class);
     Route::resource('medias', App\Http\Controllers\MediaController::class);
@@ -87,5 +101,4 @@ Route::middleware([
         Route::post('messages', App\Http\Controllers\GenerateMessagesReportController::class)
             ->name('messages');
     });
-
 });

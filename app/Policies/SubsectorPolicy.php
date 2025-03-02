@@ -3,18 +3,17 @@
 namespace App\Policies;
 
 use App\Models\Roles;
-use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class SectorPolicy
+class SubsectorPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): Response
     {
-        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SECTOR_MANAGER)) {
+        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();
         } else {
             return Response::deny('You are not authorized to perform this action.');
@@ -26,7 +25,7 @@ class SectorPolicy
      */
     public function view(User $user): Response
     {
-        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SECTOR_MANAGER)) {
+        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();
         } else {
             return Response::deny('You are not authorized to perform this action.');
@@ -38,7 +37,7 @@ class SectorPolicy
      */
     public function create(User $user): Response
     {
-        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SECTOR_MANAGER)) {
+        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();
         } else {
             return Response::deny('You are not authorized to perform this action.');
@@ -50,7 +49,7 @@ class SectorPolicy
      */
     public function update(User $user): Response
     {
-        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SECTOR_MANAGER)) {
+        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();
         } else {
             return Response::deny('You are not authorized to perform this action.');
@@ -62,7 +61,7 @@ class SectorPolicy
      */
     public function delete(User $user): Response
     {
-        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SECTOR_MANAGER)) {
+        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();
         } else {
             return Response::deny('You are not authorized to perform this action.');
@@ -73,7 +72,7 @@ class SectorPolicy
      */
     public function restore(User $user): Response
     {
-        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SECTOR_MANAGER)) {
+        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();
         } else {
             return Response::deny('You are not authorized to perform this action.');
@@ -85,7 +84,7 @@ class SectorPolicy
      */
     public function forceDelete(User $user): Response
     {
-        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SECTOR_MANAGER)) {
+        if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();
         } else {
             return Response::deny('You are not authorized to perform this action.');

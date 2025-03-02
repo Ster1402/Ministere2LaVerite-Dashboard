@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -47,6 +47,10 @@ class Roles extends Model
     public static string $HUB_MANAGER = 'hub_manager';
     public static string $END_USER = 'end_user';
 
+    // Sector management
+    public static string $SECTOR_MANAGER = 'sector_manager';
+    public static string $SUBSECTOR_ADMIN = 'subsector_manager';
+
     // Available roles
     public static function availableAdminsRoles(): Collection {
         return collect([
@@ -58,6 +62,8 @@ class Roles extends Model
             Roles::$MEDIA_MANAGER,
             Roles::$USER_MANAGER,
             Roles::$HUB_MANAGER,
+            Roles::$SECTOR_MANAGER,
+            Roles::$SUBSECTOR_ADMIN,
         ]);
     }
 

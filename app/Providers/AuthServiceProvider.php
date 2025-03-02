@@ -13,6 +13,7 @@ use App\Policies\MessagePolicy;
 use App\Policies\ResourcePolicy;
 use App\Policies\RolePolicy;
 use App\Policies\SectorPolicy;
+use App\Policies\SubsectorPolicy;
 use App\Policies\TransactionPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -25,8 +26,7 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @var array<class-string, class-string>
      */
-    protected $policies = [
-    ];
+    protected $policies = [];
 
     /**
      * Register any authentication / authorization services.
@@ -40,5 +40,38 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('admin.delete', [AdminPolicy::class, 'delete']);
         Gate::define('admin.revoke', [AdminPolicy::class, 'delete']);
         Gate::define('admin.force-delete', [AdminPolicy::class, 'forceDelete']);
+
+        Gate::define('assembly.viewAny', [AssemblyPolicy::class, 'viewAny']);
+        Gate::define('assembly.view', [AssemblyPolicy::class, 'view']);
+        Gate::define('assembly.create', [AssemblyPolicy::class, 'create']);
+        Gate::define('assembly.update', [AssemblyPolicy::class, 'update']);
+        Gate::define('assembly.delete', [AssemblyPolicy::class, 'delete']);
+        Gate::define('assembly.restore', [AssemblyPolicy::class, 'restore']);
+        Gate::define('assembly.forceDelete', [AssemblyPolicy::class, 'forceDelete']);
+
+        Gate::define('baptism.viewAny', [BaptismPolicy::class, 'viewAny']);
+        Gate::define('baptism.view', [BaptismPolicy::class, 'view']);
+        Gate::define('baptism.create', [BaptismPolicy::class, 'create']);
+        Gate::define('baptism.update', [BaptismPolicy::class, 'update']);
+        Gate::define('baptism.delete', [BaptismPolicy::class, 'delete']);
+
+        Gate::define('event.viewAny', [EventPolicy::class, 'viewAny']);
+        Gate::define('event.view', [EventPolicy::class, 'view']);
+        Gate::define('event.create', [EventPolicy::class, 'create']);
+        Gate::define('event.update', [EventPolicy::class, 'update']);
+        Gate::define('event.delete', [EventPolicy::class, 'delete']);
+        Gate::define('event.restore', [EventPolicy::class, 'restore']);
+
+        Gate::define('sector.viewAny', [SectorPolicy::class, 'viewAny']);
+        Gate::define('sector.view', [SectorPolicy::class, 'view']);
+        Gate::define('sector.create', [SectorPolicy::class, 'create']);
+        Gate::define('sector.update', [SectorPolicy::class, 'update']);
+        Gate::define('sector.delete', [SectorPolicy::class, 'delete']);
+
+        Gate::define('subsector.viewAny', [SubsectorPolicy::class, 'viewAny']);
+        Gate::define('subsector.view', [SubsectorPolicy::class, 'view']);
+        Gate::define('subsector.create', [SubsectorPolicy::class, 'create']);
+        Gate::define('subsector.update', [SubsectorPolicy::class, 'update']);
+        Gate::define('subsector.delete', [SubsectorPolicy::class, 'delete']);
     }
 }

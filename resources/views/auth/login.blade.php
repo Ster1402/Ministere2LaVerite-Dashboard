@@ -1,60 +1,78 @@
 <x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="title">
-            {{ __('Bienvenue 🖐️ !') }}
-        </x-slot>
+    <div class="login-container">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login-section"
+                    role="tab">Connexion</a>
+            </li>
+            @if (Route::has('register'))
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('register') }}" role="tab">Inscription</a>
+                </li>
+            @endif
+        </ul>
 
-        <x-validation-errors class="mb-4"/>
+        <div id="login-section" class="active">
+            <form id="login-form" class="needs-validation" method="POST" action="{{ route('login') }}" novalidate>
+                @csrf
 
-        @if (session('status'))
-            <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-                {{ session('status') }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate="">
-            @csrf
-
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" value="{{ old('email') }}" class="form-control" name="email" tabindex="1"
-                       required autofocus>
-                <div class="invalid-feedback" id="required-mail">
-                    Veuillez remplir votre adresse e-mail
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="d-block">
-                    <label for="password" class="control-label">
-                        <div id="password_label">Mot de passe</div>
-                    </label>
-                </div>
-                <input id="password" type="password" class="form-control" name="password" tabindex="2" required>
-                <div class="invalid-feedback" id="required-password">
-                    Veuillez remplir votre mot de passe
-                </div>
-            </div>
-
-            <div class="form-group block mt-4">
-                <label for="remember_me" class="flex items-center">
-                    <x-checkbox id="remember_me" name="remember"/>
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Se souvenir de moi') }}</span>
-                </label>
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-                       href="{{ route('password.request') }}">
-                        {{ __('Mot de passe oublié?') }}
-                    </a>
+                @if (session('status'))
+                    <div class="alert alert-success mb-3">
+                        {{ session('status') }}
+                    </div>
                 @endif
 
-                <x-button type="submit" id="login" class="btn btn-primary btn-lg btn-block ms-4" tabindex="4">
-                    {{ __('Connexion') }}
-                </x-button>
-            </div>
-        </form>
-    </x-authentication-card>
+                @if ($errors->any())
+                    <div class="alert alert-danger mb-3">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" class="form-control" name="email" value="{{ old('email') }}" required
+                            autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control" name="password" required>
+                        <button type="button" class="btn btn-outline-secondary toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="remember" id="remember_me">
+                        <label class="form-check-label" for="remember_me">
+                            Se souvenir de moi
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="text-decoration-none">
+                            Mot de passe oublié?
+                        </a>
+                    @endif
+                    <button type="submit" class="btn btn-primary">
+                        Se connecter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
 </x-guest-layout>

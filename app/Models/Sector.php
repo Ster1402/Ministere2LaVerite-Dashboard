@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -47,7 +47,7 @@ class Sector extends Model
 
     public function subsectors(): HasMany
     {
-        return $this->hasMany(Sector::class);
+        return $this->hasMany(Sector::class, 'master_id', 'id');
     }
 
     // Scopes filter

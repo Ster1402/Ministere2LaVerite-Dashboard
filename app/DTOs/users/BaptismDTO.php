@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\DTOs\users;
-
 
 use Spatie\LaravelData\Data;
 
@@ -17,7 +15,5 @@ class BaptismDTO extends Data
         public ?string $dateWater = null,
         public ?string $dateHolySpirit = null,
         public ?string $dateLatest = null,
-    )
-    {
-    }
+    ) {}
 }

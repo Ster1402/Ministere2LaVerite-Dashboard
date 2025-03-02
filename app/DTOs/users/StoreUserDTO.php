@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\DTOs\users;
-
 
 use App\Models\Assembly;
 use Spatie\LaravelData\Data;
@@ -32,7 +30,6 @@ class StoreUserDTO extends Data
         public ?bool $sterileWoman = false,
         public ?string $seriousIllnesses = null,
         public ?string $comment = null,
-        public ?Assembly $assembly = null)
-    {
-    }
+        public ?Assembly $assembly = null
+    ) {}
 }

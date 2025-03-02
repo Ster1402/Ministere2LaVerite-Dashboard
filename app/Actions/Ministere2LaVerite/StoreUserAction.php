@@ -1,15 +1,12 @@
 <?php
 
-
 namespace App\Actions\Ministere2LaVerite;
-
 
 use App\DTOs\commons\AssignRolesToUserDTO;
 use App\DTOs\users\StoreUserDTO;
 use App\Models\Baptism;
 use App\Models\Roles;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 
 class StoreUserAction
@@ -17,8 +14,7 @@ class StoreUserAction
     public function execute(
         StoreUserDTO $storeUserDTO,
         AssignRolesToUserAction $assignRolesToUserAction
-    ): void
-    {
+    ): void {
         $user = User::create(
             [
                 'name' => $storeUserDTO->name,
@@ -39,23 +35,25 @@ class StoreUserAction
                 'residence' => $storeUserDTO->residence,
                 'sterileWoman' => $storeUserDTO->sterileWoman ?? false,
                 'seriousIllnesses' => $storeUserDTO->seriousIllnesses,
+                'comment' => $storeUserDTO->comment,
                 'profile_photo_path' => $storeUserDTO->profile_photo_path,
-                'comment' => $storeUserDTO->comment
             ]
         );
 
         // Create Baptism information
-        $baptism = Baptism::create([
-            'date_water' => $storeUserDTO->baptism->dateWater,
-            'date_holy_spirit' => $storeUserDTO->baptism->dateHolySpirit,
-            'date_latest' => $storeUserDTO->baptism->dateLatest,
-            'user_id' => $user->id,
-            'type' => $storeUserDTO->baptism->type,
-            'hasHolySpirit' => $storeUserDTO->baptism->hasHolySpirit ?? false,
-            'ministerialLevel' => $storeUserDTO->baptism->ministerialLevel,
-            'nominalMaker' => $storeUserDTO->baptism->nominalMaker,
-            'spiritualLevel' => $storeUserDTO->baptism->spiritualLevel
-        ]);
+        if (isset($storeUserDTO->baptism)) {
+            Baptism::create([
+                'date_water' => $storeUserDTO->baptism->dateWater,
+                'date_holy_spirit' => $storeUserDTO->baptism->dateHolySpirit,
+                'date_latest' => $storeUserDTO->baptism->dateLatest,
+                'user_id' => $user->id,
+                'type' => $storeUserDTO->baptism->type,
+                'hasHolySpirit' => $storeUserDTO->baptism->hasHolySpirit ?? false,
+                'ministerialLevel' => $storeUserDTO->baptism->ministerialLevel,
+                'nominalMaker' => $storeUserDTO->baptism->nominalMaker,
+                'spiritualLevel' => $storeUserDTO->baptism->spiritualLevel
+            ]);
+        }
 
         $assignRolesToUserAction->execute(
             new AssignRolesToUserDTO(

@@ -2,19 +2,19 @@
     <x-slot name="header">
         <h4>
             <a href="#add-sector" data-toggle="modal" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Ajouter un secteur
+                <i class="fas fa-plus"></i> Ajouter un sous-secteur
             </a>
         </h4>
         <h4>
             <a href="#printSector" data-toggle="modal" class="btn btn-info">
-                <i class="fas fa-print"></i> Télécharger la liste des secteurs
+                <i class="fas fa-print"></i> Télécharger la liste des sous-sous-secteurs
             </a>
         </h4>
     </x-slot>
     <x-slot name="body">
         <x-modal-sector id="add-sector" action="{{ route('sectors.store') }}" />
         <x-modal id="printSector" action="{{ route('report.sectors') }}">
-            <h2>Voulez-vous télécharger la liste des secteurs ?</h2>
+            <h2>Voulez-vous télécharger la liste des sous-sous-secteurs ?</h2>
         </x-modal>
         <div class="table-responsive">
             <table class="table table-striped" id="sortable-table">
@@ -24,7 +24,7 @@
                             <i class="fas fa-th"></i>
                         </th>
                         <th>Nom</th>
-                        <th>Nombre de Sous-Secteur(s)</th>
+                        <th>Secteur</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -38,9 +38,8 @@
                             </td>
                             <td>{{ $sector->name }}</td>
                             <td>
-                                <div
-                                    class="badge font-weight-bold badge-{{ $sector->subsectors->count() ? 'success' : 'danger' }}">
-                                    {{ $sector->subsectors->count() }}
+                                <div class="badge font-weight-bold badge-{{ $sector->master ? 'success' : 'danger' }}">
+                                    {{ $sector->master ? $sector->master->name : 'Unknown' }}
                                 </div>
                             </td>
                             <td>
