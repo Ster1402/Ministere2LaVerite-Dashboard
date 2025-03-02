@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BulkMessageController;
 use App\Models\Assembly;
 use App\Models\Resource;
 use Illuminate\Support\Facades\Route;
@@ -87,6 +88,9 @@ Route::middleware([
         return view('log');
     })->name('log');
 
+    Route::resource('bulk-messages', BulkMessageController::class)
+    ->middleware(['auth', 'can:sendBulkMessages']);
+
     Route::resource('users', App\Http\Controllers\UserController::class);
     Route::resource('admins', App\Http\Controllers\AdminController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
@@ -94,6 +98,7 @@ Route::middleware([
     Route::resource('sectors', App\Http\Controllers\SectorController::class);
     Route::resource('subsectors', App\Http\Controllers\SubsectorController::class);
     Route::resource('messages', App\Http\Controllers\MessageController::class);
+    Route::resource('msg', App\Http\Controllers\MsgController::class);
     Route::resource('resources', App\Http\Controllers\ResourceController::class);
     Route::resource('medias', App\Http\Controllers\MediaController::class);
     Route::resource('assemblies', App\Http\Controllers\AssemblyController::class);
