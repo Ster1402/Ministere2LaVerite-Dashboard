@@ -42,18 +42,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reports/generate', [App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
 });
 
-Route::get('/dangerous-migrate-force', function () {
+Route::get('/dangerous-update-force', function () {
     Artisan::Call('migrate --force');
+    Artisan::Call('storage:unlink');
+    Artisan::Call('storage:link');
     return redirect(\route('dashboard'));
-});
-
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    // Authenticated routes
-
 });
 
 Route::middleware([
@@ -88,9 +81,6 @@ Route::middleware([
         return view('log');
     })->name('log');
 
-    Route::resource('bulk-messages', BulkMessageController::class)
-    ->middleware(['auth', 'can:sendBulkMessages']);
-
     Route::resource('users', App\Http\Controllers\UserController::class);
     Route::resource('admins', App\Http\Controllers\AdminController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
@@ -98,7 +88,6 @@ Route::middleware([
     Route::resource('sectors', App\Http\Controllers\SectorController::class);
     Route::resource('subsectors', App\Http\Controllers\SubsectorController::class);
     Route::resource('messages', App\Http\Controllers\MessageController::class);
-    Route::resource('msg', App\Http\Controllers\MsgController::class);
     Route::resource('resources', App\Http\Controllers\ResourceController::class);
     Route::resource('medias', App\Http\Controllers\MediaController::class);
     Route::resource('assemblies', App\Http\Controllers\AssemblyController::class);

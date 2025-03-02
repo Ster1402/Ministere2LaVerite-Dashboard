@@ -91,6 +91,19 @@
                     </div>
 
                     <div class="form-group row mb-4">
+                        <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Envoyé le contenu via SMS ?</label>
+
+                        <div class="col-sm-12 col-md-7">
+                            <label class="custom-switch mt-2">
+                                <input type="checkbox" name="sendBySMS" id="smscheck"
+                                       class="custom-switch-input">
+                                <span class="custom-switch-indicator"></span>
+                                <span class="custom-switch-description"> Oui ou Non ?</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-4">
                         <label for="content" class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Votre
                             message</label>
                         <div class="col-sm-12 col-md-7">

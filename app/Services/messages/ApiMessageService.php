@@ -22,6 +22,7 @@ class ApiMessageService
 
     public function send($to, $message, $from = null, $service = null): bool
     {
+
         if ($service === null) {
             // Send the message using the default service
             $this->defaultService->send($to, $message, $from);

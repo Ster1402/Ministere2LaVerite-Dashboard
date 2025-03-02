@@ -50,7 +50,7 @@ class NexahService implements SmsService
                     'mobiles' => $to,
                 ],
             ]);
-        } catch (RequestException|GuzzleException $ex) {
+        } catch (RequestException | GuzzleException $ex) {
             // Log the error
             \Log::error($ex->getMessage());
             dd($ex->getMessage());
@@ -81,11 +81,10 @@ class NexahService implements SmsService
                 'account' => $this->user,
                 'name' => $this->defaultSender,
             ];
-
-        } catch (RequestException|GuzzleException $ex) {
+        } catch (RequestException | GuzzleException $ex) {
             // Log the error
             \Log::error($ex->getMessage());
-            dd($ex->getMessage());
+            throw $ex;
         }
     }
 }

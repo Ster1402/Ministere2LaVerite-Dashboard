@@ -18,7 +18,6 @@ class MessageDTO extends Data
         public ?string $tags = null,
         public bool    $received = true,
         public bool    $seen = false,
-    )
-    {
-    }
+        public bool    $shouldSendSMS = false,
+    ) {}
 }

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\Commons\SMSMessageFormatter;
+use App\Services\messages\ApiMessageService;
+use App\Services\messages\NexahService;
 use App\Services\messages\TwilioService;
 use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use Illuminate\Pagination\Paginator;
@@ -29,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(ApiMessageService::class, function ($app) {
             return new ApiMessageService($app->make(TwilioService::class), $app->make(NexahService::class));
+        });
+
+        $this->app->singleton(SMSMessageFormatter::class, function () {
+            return new SMSMessageFormatter();
         });
     }
 
