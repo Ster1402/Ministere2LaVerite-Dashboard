@@ -13,17 +13,15 @@
                 <a class="dropdown-item has-icon" href="{{ route('donations.create') }}">
                     <i class="fas fa-plus"></i> Faire un don
                 </a>
-                <a class="dropdown-item has-icon" href="#print-donations" data-toggle="modal">
-                    <i class="fas fa-print"></i> Télécharger la liste
+                <a href="#" class="dropdown-item has-icon" data-toggle="modal" data-target="#reportModal">
+                    <i class="fas fa-print"></i> Exporter la liste des dons
                 </a>
             </div>
         </div>
     </x-slot>
 
     <x-slot name="body">
-        <x-modal id="print-donations" action="{{ route('report.donations') }}">
-            <h2>Voulez-vous lancer le téléchargement de la liste des dons ?</h2>
-        </x-modal>
+        <x-report-modal model-name="donations" title="Exporter la liste des admins" />
 
         <div class="table-responsive table-invoice">
             <table class="table table-striped">
@@ -82,13 +80,5 @@
             </div>
         @endif
 
-        <div class="mt-4">
-
-            <button class="btn btn-primary" data-toggle="modal" data-target="#donation-modal">
-                <i class="fas fa-hand-holding-heart"></i> Faire un don
-            </button>
-
-            <x-donation-modal />
-        </div>
     </x-slot>
 </x-table-layout>

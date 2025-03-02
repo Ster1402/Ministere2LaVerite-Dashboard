@@ -6,16 +6,15 @@
             </a>
         </h4>
         <h4>
-            <a href="#printSector" data-toggle="modal" class="btn btn-info">
-                <i class="fas fa-print"></i> Télécharger la liste des sous-sous-secteurs
+            <a href="#" class="btn btn-info" data-toggle="modal" data-target="#reportModal">
+                <i class="fas fa-print"></i> Exporter la liste des sous-secteurs
             </a>
         </h4>
     </x-slot>
     <x-slot name="body">
         <x-modal-sector id="add-sector" action="{{ route('sectors.store') }}" />
-        <x-modal id="printSector" action="{{ route('report.sectors') }}">
-            <h2>Voulez-vous télécharger la liste des sous-sous-secteurs ?</h2>
-        </x-modal>
+        <x-report-modal model-name="subsectors" title="Exporter la liste des sous-secteurs" />
+
         <div class="table-responsive">
             <table class="table table-striped" id="sortable-table">
                 <thead>

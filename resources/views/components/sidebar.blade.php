@@ -43,11 +43,6 @@
                 {{ __('Dons') }}
             </x-nav-link>
 
-            <li style="margin-right: 100%;" class="{{ request()->routeIs('admins.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admins.index') }}"><i class="fas fa-database"></i>Administrateurs
-                </a>
-            </li>
-
             @can('viewAny', User::class)
                 <li class="menu-header">GESTION UTILISATEURS</li>
                 <li style="margin-right: 100%;" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">

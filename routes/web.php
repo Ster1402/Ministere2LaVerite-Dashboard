@@ -31,6 +31,16 @@ Route::post('/payment-methods/validate-phone', [App\Http\Controllers\PaymentMeth
 // Public callback route for FreeMoPay
 Route::post('/donations/callback', [DonationController::class, 'callback'])->name('donations.callback');
 
+// Report routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reports/model-data', [App\Http\Controllers\ReportController::class, 'getModelData'])->name('reports.model-data');
+});
+
+// Report routes
+Route::middleware(['auth'])->group(function () {
+    Route::post('/reports/generate', [App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
+});
+
 Route::get('/dangerous-migrate-force', function () {
     Artisan::Call('migrate --force');
     return redirect(\route('dashboard'));
@@ -94,27 +104,5 @@ Route::middleware([
     Route::post('/resources/{resource}/users', App\Http\Controllers\BorrowedResourceController::class)
         ->name('resources.users.borrow')->can('update', Resource::class);
 
-    // Reporting
-    Route::group(['prefix' => '/report', 'as' => 'report.'], function () {
-        Route::post('admins', App\Http\Controllers\GenerateAdminsReportController::class)
-            ->name('admins');
-        Route::post('donations', App\Http\Controllers\GenerateDonationsReportController::class)
-            ->name('donations');
-        Route::post('users', App\Http\Controllers\GenerateUsersReportController::class)
-            ->name('users');
-        Route::post('events', App\Http\Controllers\GenerateEventsReportController::class)
-            ->name('events');
-        Route::post('groups', App\Http\Controllers\GenerateGroupsReportController::class)
-            ->name('groups');
-        Route::post('sectors', App\Http\Controllers\GenerateSectorsReportController::class)
-            ->name('sectors');
-        Route::post('assemblies', App\Http\Controllers\GenerateAssembliesReportController::class)
-            ->name('assemblies');
-        Route::post('medias', App\Http\Controllers\GenerateMediasReportController::class)
-            ->name('medias');
-        Route::post('resources', App\Http\Controllers\GenerateResourcesReportController::class)
-            ->name('resources');
-        Route::post('messages', App\Http\Controllers\GenerateMessagesReportController::class)
-            ->name('messages');
-    });
+    Route::resource('donations', DonationController::class)->except(['show']);
 });

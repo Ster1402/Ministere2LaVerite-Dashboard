@@ -2,14 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DeleteDonationRequest;
 use App\Models\Donation;
 use App\Models\Transaction;
 use App\Models\PaymentMethod;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class DonationController extends Controller
 {
+
+    public function index()
+    {
+        $donations = Donation::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('donations.index', compact('donations'));
+    }
     /**
      * Store a new donation transaction.
      */
@@ -80,5 +91,24 @@ class DonationController extends Controller
         // Return with success message
         return redirect()->back()
             ->with('success', "Merci pour votre don de {$transaction->amount} {$transaction->currency}! Votre référence de transaction est: {$referenceNumber}");
+    }
+
+    /**
+     * Delete a specific donation.
+     *
+     * @param DeleteDonationRequest $request
+     * @param Donation $donation
+     * @return RedirectResponse
+     */
+    public function destroy(DeleteDonationRequest $request, Donation $donation): RedirectResponse
+    {
+        // Soft delete the donation
+        $donation->delete();
+
+        // Flash success message
+        session()->flash('success', 'Le don a été supprimé avec succès.');
+
+        // Redirect back to donations index
+        return redirect()->route('donations.index');
     }
 }
