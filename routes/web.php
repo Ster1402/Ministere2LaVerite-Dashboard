@@ -3,6 +3,7 @@
 use App\Models\Assembly;
 use App\Models\Resource;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DonationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,21 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+// Donation Routes (all users)
+Route::get('/donations', [DonationController::class, 'index'])->name('donations.index');
+Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
+Route::get('/donations/{donation}/confirm', [DonationController::class, 'confirm'])->name('donations.confirm');
+
+// Routes for donations - accessible to everyone, no auth required
+Route::post('/donations', [App\Http\Controllers\DonationController::class, 'store'])->name('donations.store');
+
+// Routes for payment method validation
+Route::post('/payment-methods/validate-phone', [App\Http\Controllers\PaymentMethodController::class, 'validatePhone'])
+    ->name('payment-methods.validate-phone');
+
+// Public callback route for FreeMoPay
+Route::post('/donations/callback', [DonationController::class, 'callback'])->name('donations.callback');
 
 Route::get('/dangerous-migrate-force', function () {
     Artisan::Call('migrate --force');

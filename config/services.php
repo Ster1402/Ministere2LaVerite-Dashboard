@@ -31,4 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'freemopay' => [
+        'url' => env('FREEMOPAY_API_URL', 'https://business.freemopay.com'),
+        'app_key' => env('FREEMOPAY_APP_KEY'),
+        'secret_key' => env('FREEMOPAY_SECRET_KEY'),
+    ],
+
 ];
