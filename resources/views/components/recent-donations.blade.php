@@ -10,9 +10,6 @@
                 <a class="dropdown-item has-icon" href="{{ route('donations.index') }}">
                     <i class="fas fa-list"></i> Voir tous les dons
                 </a>
-                <a class="dropdown-item has-icon" href="{{ route('donations.create') }}">
-                    <i class="fas fa-plus"></i> Faire un don
-                </a>
                 <a href="#" class="dropdown-item has-icon" data-toggle="modal" data-target="#reportModal">
                     <i class="fas fa-print"></i> Exporter la liste des dons
                 </a>

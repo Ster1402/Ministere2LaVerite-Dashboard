@@ -44,8 +44,10 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/dangerous-update-force', function () {
     Artisan::Call('migrate --force');
-    Artisan::Call('storage:unlink');
-    Artisan::Call('storage:link');
+    Artisan::Call('db:seed');
+    Artisan::Call('db:seed --class=PaymentMethodSeeder');
+    Artisan::Call('db:seed --class=RolesSeeder');
+
     return redirect(\route('dashboard'));
 });
 
