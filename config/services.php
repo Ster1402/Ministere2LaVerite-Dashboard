@@ -32,7 +32,7 @@ return [
     ],
 
     'freemopay' => [
-        'url' => env('FREEMOPAY_API_URL', 'https://business.freemopay.com'),
+        'url' => env('FREEMOPAY_API_URL', 'https://api-v2.freemopay.com/api/v2'),
         'app_key' => env('FREEMOPAY_APP_KEY'),
         'secret_key' => env('FREEMOPAY_SECRET_KEY'),
     ],
