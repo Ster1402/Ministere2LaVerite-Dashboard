@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Donation;
+use App\Models\Transaction;
+use App\Services\Commons\PhoneNumberFormatter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -17,6 +19,7 @@ class FreeMoPayService
 
     public function __construct()
     {
+        // Load configuration from config/services.php
         $this->baseUrl = config('services.freemopay.url');
         $this->appKey = config('services.freemopay.app_key');
         $this->secretKey = config('services.freemopay.secret_key');
@@ -24,7 +27,7 @@ class FreeMoPayService
     }
 
     /**
-     * Generate a token for API requests
+     * Generate a bearer token for API requests
      *
      * @return string|null
      */
@@ -38,7 +41,7 @@ class FreeMoPayService
 
             if ($response->successful()) {
                 $data = $response->json();
-                $this->token = $data['token'] ?? null;
+                $this->token = $data['access_token'] ?? null;
                 return $this->token;
             }
 
@@ -78,15 +81,16 @@ class FreeMoPayService
         try {
             $response = Http::withToken($this->token)
                 ->post("{$this->baseUrl}/api/v2/payment", [
-                    'payer' => $donation->phone_number,
-                    'amount' => (float)$donation->amount,
+                    'payer' => $donation->donor_phone,
+                    'amount' => (int)$donation->amount,
                     'externalId' => $donation->reference,
-                    'description' => 'Donation to Ministere de la Verite' . ($donation->is_anonymous ? '' : ' from ' . $donation->donor_name),
+                    'description' => 'Donation to Ministere2LaVerite' . ($donation->is_anonymous ? '' : ' from ' . $donation->donor_name),
                     'callback' => $this->callbackUrl,
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json();
+                ddd($data);
 
                 // Update the donation with payment reference
                 $donation->update([
@@ -179,6 +183,117 @@ class FreeMoPayService
                 'success' => false,
                 'message' => 'Payment status check error occurred: ' . $e->getMessage()
             ];
+        }
+    }
+
+    /**
+     * Process a successful payment
+     *
+     * @param string $reference Payment reference from FreeMoPay
+     * @param string $externalId External reference (our donation reference)
+     * @param float $amount Payment amount
+     * @return bool
+     */
+    public function processSuccessfulPayment($reference, $externalId, $amount)
+    {
+        try {
+            // Find the donation by external reference
+            $donation = Donation::where('reference', $externalId)->first();
+
+            if (!$donation) {
+                Log::error('Donation not found for payment', [
+                    'reference' => $reference,
+                    'externalId' => $externalId
+                ]);
+                return false;
+            }
+
+            // Update donation status
+            $donation->update([
+                'status' => 'completed',
+                'transaction_id' => $reference
+            ]);
+
+            // Create or update transaction
+            if (!$donation->transaction_id) {
+                Transaction::create([
+                    'amount' => $amount,
+                    'currency' => 'XAF',
+                    'comment' => 'Online donation',
+                    'user_id' => $donation->user_id,
+                    'donor_name' => $donation->donor_name,
+                    'donor_email' => $donation->donor_email,
+                    'donor_phone' => $donation->donor_phone,
+                    'payment_method_id' => $donation->payment_method_id,
+                    'is_processed' => true,
+                    'transaction_reference' => $reference
+                ]);
+            }
+
+            Log::info('Payment processed successfully', [
+                'reference' => $reference,
+                'donation_id' => $donation->id
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error processing payment', [
+                'reference' => $reference,
+                'externalId' => $externalId,
+                'error' => $e->getMessage()
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Process a failed payment
+     *
+     * @param string $reference Payment reference from FreeMoPay
+     * @param string $externalId External reference (our donation reference)
+     * @param string $reason Failure reason
+     * @return bool
+     */
+    public function processFailedPayment($reference, $externalId, $reason)
+    {
+        try {
+            // Find the donation by external reference
+            $donation = Donation::where('reference', $externalId)->first();
+
+            if (!$donation) {
+                Log::error('Donation not found for failed payment', [
+                    'reference' => $reference,
+                    'externalId' => $externalId
+                ]);
+                return false;
+            }
+
+            // Update donation status
+            $donation->update([
+                'status' => 'failed',
+                'transaction_id' => $reference,
+                'payment_data' => array_merge(
+                    $donation->payment_data ?? [],
+                    ['failure_reason' => $reason]
+                )
+            ]);
+
+            Log::info('Failed payment processed', [
+                'reference' => $reference,
+                'donation_id' => $donation->id,
+                'reason' => $reason
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error processing failed payment', [
+                'reference' => $reference,
+                'externalId' => $externalId,
+                'error' => $e->getMessage()
+            ]);
+
+            return false;
         }
     }
 }
