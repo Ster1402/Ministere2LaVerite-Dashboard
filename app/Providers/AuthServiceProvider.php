@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+
+use App\Models\Roles;
 use App\Policies\AdminPolicy;
 use App\Policies\AssemblyPolicy;
 use App\Policies\BaptismPolicy;
@@ -73,5 +75,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('subsector.create', [SubsectorPolicy::class, 'create']);
         Gate::define('subsector.update', [SubsectorPolicy::class, 'update']);
         Gate::define('subsector.delete', [SubsectorPolicy::class, 'delete']);
+
     }
 }

@@ -32,9 +32,9 @@ class StoreMessageRequest extends FormRequest
             'assemblies' => 'array',
             'category' => 'string|min:3',
             'replyTo' => 'integer',
-//            'sendToAssembly' => 'required|bool'
-//            'tags' => 'string',
-//            'picture' => 'file|image',
+            //            'sendToAssembly' => 'required|bool'
+            //            'tags' => 'string',
+            //            'picture' => 'file|image',
         ];
     }
 
@@ -60,6 +60,7 @@ class StoreMessageRequest extends FormRequest
             tags: $this->input('tags') ?? '',
             received: true,
             seen: false,
+            shouldSendSMS: $this->input('sendBySMS') ? true : false,
         );
     }
 }

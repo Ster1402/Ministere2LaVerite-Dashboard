@@ -39,6 +39,10 @@
                 </li>
             @endcan
 
+            <x-nav-link header="Donations" icon="fa-fire" :href="route('donations.index')" :active="request()->routeIs('donations.*')">
+                {{ __('Dons') }}
+            </x-nav-link>
+
             @can('viewAny', User::class)
                 <li class="menu-header">GESTION UTILISATEURS</li>
                 <li style="margin-right: 100%;" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">

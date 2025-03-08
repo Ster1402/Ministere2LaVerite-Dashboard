@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -27,17 +28,19 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @method static \Illuminate\Database\Eloquent\Builder|RoleUser whereUserId($value)
  * @mixin \Eloquent
  */
-class RoleUser
+class RoleUser extends Pivot
 {
     use HasFactory;
+    // Enable timestamps for this pivot model
+    public $timestamps = true;
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTimestamps(); // Enable automatic timestamp management;
     }
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo(Roles::class);
+        return $this->belongsTo(Roles::class)->withTimestamps(); // Enable automatic timestamp management;
     }
 }

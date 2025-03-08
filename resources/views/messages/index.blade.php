@@ -31,6 +31,8 @@
                     </li>
                 </ul>
             </div>
+            <x-info-message-account/>
+
             <x-table-messages :data="$messagesSent"/>
         </x-slot>
         <x-slot name="home">

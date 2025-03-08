@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\BulkMessageController;
 use App\Models\Assembly;
 use App\Models\Resource;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DonationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,18 +17,38 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/dangerous-migrate-force', function () {
-    Artisan::Call('migrate --force');
-    return redirect(\route('dashboard'));
+// Donation Routes (all users)
+Route::get('/donations', [DonationController::class, 'index'])->name('donations.index');
+Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
+Route::get('/donations/{donation}/confirm', [DonationController::class, 'confirm'])->name('donations.confirm');
+
+// Routes for donations - accessible to everyone, no auth required
+Route::post('/donations', [App\Http\Controllers\DonationController::class, 'store'])->name('donations.store');
+
+// Routes for payment method validation
+Route::post('/payment-methods/validate-phone', [App\Http\Controllers\PaymentMethodController::class, 'validatePhone'])
+    ->name('payment-methods.validate-phone');
+
+// Public callback route for FreeMoPay
+Route::post('/donations/callback', [DonationController::class, 'callback'])->name('donations.callback');
+
+// Report routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reports/model-data', [App\Http\Controllers\ReportController::class, 'getModelData'])->name('reports.model-data');
 });
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    // Authenticated routes
+// Report routes
+Route::middleware(['auth'])->group(function () {
+    Route::post('/reports/generate', [App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
+});
 
+Route::get('/dangerous-update-force', function () {
+    Artisan::Call('migrate --force');
+    Artisan::Call('db:seed');
+    Artisan::Call('db:seed --class=PaymentMethodSeeder');
+    Artisan::Call('db:seed --class=RolesSeeder');
+
+    return redirect(\route('dashboard'));
 });
 
 Route::middleware([
@@ -78,27 +100,5 @@ Route::middleware([
     Route::post('/resources/{resource}/users', App\Http\Controllers\BorrowedResourceController::class)
         ->name('resources.users.borrow')->can('update', Resource::class);
 
-    // Reporting
-    Route::group(['prefix' => '/report', 'as' => 'report.'], function () {
-        Route::post('admins', App\Http\Controllers\GenerateAdminsReportController::class)
-            ->name('admins');
-        Route::post('donations', App\Http\Controllers\GenerateDonationsReportController::class)
-            ->name('donations');
-        Route::post('users', App\Http\Controllers\GenerateUsersReportController::class)
-            ->name('users');
-        Route::post('events', App\Http\Controllers\GenerateEventsReportController::class)
-            ->name('events');
-        Route::post('groups', App\Http\Controllers\GenerateGroupsReportController::class)
-            ->name('groups');
-        Route::post('sectors', App\Http\Controllers\GenerateSectorsReportController::class)
-            ->name('sectors');
-        Route::post('assemblies', App\Http\Controllers\GenerateAssembliesReportController::class)
-            ->name('assemblies');
-        Route::post('medias', App\Http\Controllers\GenerateMediasReportController::class)
-            ->name('medias');
-        Route::post('resources', App\Http\Controllers\GenerateResourcesReportController::class)
-            ->name('resources');
-        Route::post('messages', App\Http\Controllers\GenerateMessagesReportController::class)
-            ->name('messages');
-    });
+    Route::resource('donations', DonationController::class)->except(['show']);
 });

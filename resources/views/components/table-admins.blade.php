@@ -6,16 +6,15 @@
             </a>
         </h4>
         <h4>
-            <a href="#print-admins" data-toggle="modal" class="btn btn-info">
-                <i class="fas fa-print"></i> Télécharger la liste des admins
+            <a href="#" class="btn btn-info" data-toggle="modal" data-target="#reportModal">
+                <i class="fas fa-print"></i> Exporter la liste des admins
             </a>
         </h4>
     </x-slot>
     <x-slot name="body">
         <!-- Modal -->
-        <x-modal id="print-admins" action="{{ route('report.admins') }}">
-            <h2>Voulez-vous lancer le téléchargement de la liste des admins ?</h2>
-        </x-modal>
+        <x-report-modal model-name="admins" title="Exporter la liste des admins" />
+        
         <x-modal id="add-admin" action="{{ route('admins.store') }}">
             <div class="form-group">
                 <x-select-end-users />

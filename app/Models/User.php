@@ -3,15 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use App\Interfaces\ReportableModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
+use App\Traits\Reportable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -106,13 +109,14 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static Builder|User whereProfession($value)
  * @mixin \Eloquent
  */
-class User extends Authenticatable
+class User extends Authenticatable implements ReportableModel
 {
     use HasApiTokens;
     use HasFactory;
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use Reportable;
 
     /**
      * The attributes that are mass assignable.
@@ -168,9 +172,12 @@ class User extends Authenticatable
     }
 
     /* Relationships --------------------------------*/
+    // In User model
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Roles::class, 'role_user', 'user_id', 'role_id');
+        return $this->belongsToMany(Roles::class, 'role_user', 'user_id', 'role_id')
+            ->withPivot('created_at', 'updated_at') // Explicitly include pivot timestamps
+            ->withTimestamps(); // Ensure Laravel manages timestamps
     }
 
     public function messagesSent(): HasMany
@@ -240,5 +247,110 @@ class User extends Authenticatable
                             ->orWhere("email", "like", '%' . $search . '%');
                     });
             });
+    }
+
+    /**
+     * Get reportable columns for this model.
+     *
+     * @return array
+     */
+    public static function getReportableColumns()
+    {
+        return [
+            'id' => [
+                'title' => 'ID',
+                'data' => 'id',
+            ],
+            'name' => [
+                'title' => 'Nom',
+                'data' => 'name',
+            ],
+            'surname' => [
+                'title' => 'Prénom',
+                'data' => 'surname',
+            ],
+            'email' => [
+                'title' => 'Email',
+                'data' => 'email',
+            ],
+            'gender' => [
+                'title' => 'Genre',
+                'data' => function ($user) {
+                    return $user->gender === 'male' ? 'Homme' : ($user->gender === 'female' ? 'Femme' : 'Non spécifié');
+                },
+            ],
+            'phone_number' => [
+                'title' => 'Téléphone',
+                'data' => 'phoneNumber',
+            ],
+            'residence' => [
+                'title' => 'Adresse',
+                'data' => 'residence',
+            ],
+            'date_of_birth' => [
+                'title' => 'Date de naissance',
+                'data' => function ($user) {
+                    return $user->dateOfBirth ? $user->dateOfBirth->format('d/m/Y') : '';
+                },
+            ],
+            'arrival_date' => [
+                'title' => "Date d'arrivée",
+                'data' => function ($user) {
+                    return $user->arrivalDate ? $user->arrivalDate->format('d/m/Y') : '';
+                },
+            ],
+            'marital_status' => [
+                'title' => 'Statut marital',
+                'data' => 'maritalStatus',
+            ],
+            'number_of_children' => [
+                'title' => "Nombre d'enfants",
+                'data' => 'numberOfChildren',
+            ],
+            'roles' => [
+                'title' => 'Rôles',
+                'data' => function ($user) {
+                    return $user->roles->pluck('displayName')->implode(', ');
+                },
+            ],
+            'assembly' => [
+                'title' => 'Assemblée',
+                'data' => function ($user) {
+                    return $user->assembly ? $user->assembly->name : 'Non assigné';
+                },
+            ],
+            'is_active' => [
+                'title' => 'Statut',
+                'data' => function ($user) {
+                    return $user->isActive ? 'Actif' : 'Inactif';
+                },
+            ],
+            'created_at' => [
+                'title' => 'Date de création',
+                'data' => function ($user) {
+                    return $user->created_at->format('d/m/Y H:i');
+                },
+            ],
+        ];
+    }
+
+    /**
+     * Get the report title.
+     *
+     * @return string
+     */
+    public static function getReportTitle()
+    {
+        return "Liste des utilisateurs";
+    }
+
+    /**
+     * Get the default ordering for reports.
+     *
+     * @return string
+     */
+    public static function getReportDefaultOrder()
+    {
+        return 'name';
     }
 }
