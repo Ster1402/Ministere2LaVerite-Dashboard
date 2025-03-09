@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DeleteDonationRequest;
 use App\Models\Donation;
-use App\Models\Transaction;
 use App\Models\PaymentMethod;
-use App\Services\Commons\PhoneNumberFormatter;
 use App\Services\FreeMoPayService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class DonationController extends Controller
 {
@@ -21,12 +21,9 @@ class DonationController extends Controller
         $this->freeMoPayService = $freeMoPayService;
     }
 
-    /**
-     * Display a listing of donations
-     */
     public function index()
     {
-        $donations = Donation::with(['user', 'paymentMethod'])
+        $donations = Donation::with('user')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -34,171 +31,265 @@ class DonationController extends Controller
     }
 
     /**
-     * Show donation creation form
+     * Show the donation form
      */
-    public function create()
+    public function showDonationForm()
     {
-        $paymentMethods = PaymentMethod::where('is_active', true)
-            ->orderBy('order')
-            ->get();
+        // Get available payment methods
+        $paymentMethods = PaymentMethod::where('is_active', true)->get();
 
-        return view('donations.create', compact('paymentMethods'));
+        // Check if the authenticated user has any pending donations
+        $pendingDonations = null;
+        if (Auth::check()) {
+            $pendingResult = $this->freeMoPayService->getUserPendingDonations(Auth::id());
+            if ($pendingResult['success'] && !empty($pendingResult['pending_donations'])) {
+                $pendingDonations = $pendingResult['pending_donations'];
+            }
+        }
+
+        return view('donations.form', [
+            'paymentMethods' => $paymentMethods,
+            'pendingDonations' => $pendingDonations
+        ]);
     }
 
     /**
-     * Store a new donation
+     * Process a new donation submission
      */
-    public function store(Request $request)
+    public function processDonation(Request $request)
     {
-        $validated = $request->validate([
+        // Validate the donation request
+        $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:100',
-            'currency' => 'required|string',
-            'comment' => 'nullable|string',
-            'name' => 'nullable|string',
-            'email' => 'nullable|email',
-            'phone' => 'required|string',
-            'payment_method_id' => 'required|exists:payment_methods,id',
+            'donor_name' => 'required_unless:is_anonymous,1|string|max:100',
+            'donor_email' => 'required_unless:is_anonymous,1|email|max:100',
+            'donor_phone' => 'required|string|max:20',
+            'message' => 'nullable|string|max:500',
+            'is_anonymous' => 'nullable|boolean',
+            'payment_method_id' => 'required|exists:payment_methods,id'
         ]);
 
-        // Validate the phone number against the selected payment method
-        $paymentMethod = PaymentMethod::findOrFail($validated['payment_method_id']);
-        $phone = preg_replace('/\s+/', '', PhoneNumberFormatter::reformat($validated['phone']));
-
-        if ($paymentMethod->phone_regex && !preg_match('/' . $paymentMethod->phone_regex . '/', $phone)) {
+        if ($validator->fails()) {
             return redirect()->back()
-                ->withInput()
-                ->withErrors(['phone' => 'Le numéro de téléphone ne correspond pas au service de paiement sélectionné.']);
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        // Generate a reference number
-        $referenceNumber = 'DON-' . strtoupper(Str::random(6));
+        // Prepare donation data
+        $donationData = [
+            'amount' => $request->amount,
+            'donor_name' => $request->donor_name,
+            'donor_email' => $request->donor_email,
+            'donor_phone' => $request->donor_phone,
+            'message' => $request->message,
+            'is_anonymous' => (bool) $request->is_anonymous,
+            'payment_method_id' => $request->payment_method_id,
+            'user_id' => Auth::id(), // Will be null for guests
+        ];
 
-        // Create the donation record
-        $donation = Donation::create([
-            'amount' => $validated['amount'],
-            'currency' => $validated['currency'],
-            'donor_name' => $validated['name'] ?? 'Anonyme',
-            'donor_email' => $validated['email'] ?? null,
-            'donor_phone' => $phone,
-            'donation_date' => now(),
-            'message' => $validated['comment'] ?? null,
-            'is_anonymous' => empty($validated['name']),
-            'user_id' => auth()->id(),
-            'payment_method_id' => $validated['payment_method_id'],
-            'status' => 'pending',
-            'reference' => $referenceNumber
-        ]);
+        // Create a pending donation
+        $donation = $this->freeMoPayService->createPendingDonation($donationData);
 
-        // Process payment with FreeMoPay
+        if (!$donation) {
+            Log::error('Failed to create donation', ['data' => $donationData]);
+            return redirect()->back()
+                ->with('error', 'Unable to process your donation at this time. Please try again later.')
+                ->withInput();
+        }
+
+        // Attempt to initiate payment
         $paymentResult = $this->freeMoPayService->initiatePayment($donation);
 
         if (!$paymentResult['success']) {
-            // If payment initiation failed, update donation status and show error
-            $donation->update([
-                'status' => 'failed',
-                'payment_data' => ['error' => $paymentResult['message']]
-            ]);
-
+            // Payment initiation failed, but we keep the pending donation
             return redirect()->back()
-                ->with('error', 'Échec de l\'initialisation du paiement: ' . $paymentResult['message']);
+                ->with('error', 'Payment initiation failed: ' . $paymentResult['message'])
+                ->with('donation_id', $donation->id)
+                ->withInput();
         }
 
-        // If payment was initiated successfully
-        if ($paymentResult['status'] === 'SUCCESS') {
-            // Create transaction record
-            Transaction::create([
-                'amount' => $validated['amount'],
-                'currency' => $validated['currency'],
-                'comment' => $validated['comment'] ?? 'Don en ligne',
-                'user_id' => auth()->id(),
-                'donor_name' => $validated['name'] ?? 'Anonyme',
-                'donor_email' => $validated['email'] ?? null,
-                'donor_phone' => $phone,
-                'payment_method_id' => $validated['payment_method_id'],
-                'is_processed' => true,
-                'transaction_reference' => $paymentResult['reference']
-            ]);
+        // Redirect to payment confirmation page
+        return redirect()->route('donations.confirmation', ['id' => $donation->id])
+            ->with('payment_reference', $paymentResult['reference']);
+    }
+
+    /**
+     * Show donation confirmation/status page
+     */
+    public function showConfirmation($id)
+    {
+        $donationInfo = $this->freeMoPayService->getDonationInfo($id);
+
+        if (!$donationInfo['success']) {
+            return redirect()->route('donations.form')
+                ->with('error', 'Donation information not found.');
+        }
+
+        $donation = $donationInfo['donation'];
+
+        // Check if this donation belongs to the current user (if authenticated)
+        if (Auth::check() && $donation['user_id'] && $donation['user_id'] != Auth::id()) {
+            return redirect()->route('donations.form')
+                ->with('error', 'You do not have permission to view this donation.');
+        }
+
+        return view('donations.confirmation', [
+            'donation' => $donation,
+            'paymentReference' => session('payment_reference')
+        ]);
+    }
+
+    /**
+     * FreeMoPay callback handler
+     */
+    public function handleCallback(Request $request)
+    {
+        // Log the incoming callback data
+        Log::info('Payment callback received', [
+            'data' => $request->all()
+        ]);
+
+        $result = $this->freeMoPayService->processCallback($request->all());
+
+        if ($result) {
+            return response()->json(['status' => 'success']);
+        } else {
+            return response()->json(['status' => 'error'], 500);
+        }
+    }
+
+    /**
+     * Check the status of a donation (AJAX endpoint)
+     */
+    public function checkDonationStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'donation_id' => 'required|exists:donations,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid donation ID'
+            ], 400);
+        }
+
+        $donation = Donation::find($request->donation_id);
+
+        // Security check - only allow users to check their own donations or donations without a user_id
+        if (Auth::check() && $donation->user_id && $donation->user_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to check this donation'
+            ], 403);
+        }
+
+        // Get fresh donation info (this will trigger status update if needed)
+        $donationInfo = $this->freeMoPayService->getDonationInfo($request->donation_id);
+
+        if (!$donationInfo['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error checking donation status'
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'donation' => $donationInfo['donation']
+        ]);
+    }
+
+    /**
+     * Show the user's donation history
+     */
+    public function showMyDonations()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('message', 'Please login to view your donation history');
+        }
+
+        $donations = Donation::where('user_id', Auth::id())
+            ->orderBy('donation_date', 'desc')
+            ->paginate(10);
+
+        return view('donations.my-donations', [
+            'donations' => $donations
+        ]);
+    }
+
+    /**
+     * Cancel a pending donation (AJAX endpoint)
+     */
+    public function cancelDonation(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'donation_id' => 'required|exists:donations,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid donation ID'
+            ], 400);
+        }
+
+        $donation = Donation::find($request->donation_id);
+
+        // Only allow cancellation of pending donations by the donation owner
+        if ($donation->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only pending donations can be canceled'
+            ], 400);
+        }
+
+        // Security check - only allow users to cancel their own donations
+        if (Auth::check() && $donation->user_id && $donation->user_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to cancel this donation'
+            ], 403);
+        }
+
+        try {
+            // If there's a transaction ID, we should notify the payment provider
+            if ($donation->transaction_id) {
+                // This would ideally cancel the payment with the provider
+                // For now, we just log it
+                Log::info('Payment cancellation requested', [
+                    'donation_id' => $donation->id,
+                    'transaction_id' => $donation->transaction_id
+                ]);
+            }
 
             // Update donation status
-            $donation->update([
-                'status' => 'completed',
-                'transaction_id' => $paymentResult['reference']
+            $donation->update(['status' => 'failed']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Donation canceled successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error canceling donation', [
+                'donation_id' => $donation->id,
+                'error' => $e->getMessage()
             ]);
 
-            return redirect()->route('donations.confirm', $donation)
-                ->with('success', 'Votre don a été traité avec succès! Merci pour votre générosité.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Error canceling donation'
+            ], 500);
         }
-
-        // If payment is pending (requires user action)
-        return redirect()->route('donations.confirm', $donation)
-            ->with('info', 'Votre demande de don a été initiée. Veuillez suivre les instructions sur votre téléphone pour confirmer le paiement.');
-    }
-
-    /**
-     * Show donation confirmation page
-     */
-    public function confirm(Donation $donation)
-    {
-        // If the donation is still pending, check its status
-        if ($donation->status === 'pending' && $donation->transaction_id) {
-            $statusResult = $this->freeMoPayService->checkPaymentStatus($donation->transaction_id);
-
-            if ($statusResult['success']) {
-                // Update donation status based on payment status
-                if ($statusResult['status'] === 'SUCCESS') {
-                    $donation->update(['status' => 'completed']);
-                } elseif (in_array($statusResult['status'], ['FAILED', 'CANCELED'])) {
-                    $donation->update([
-                        'status' => 'failed',
-                        'payment_data' => array_merge(
-                            $donation->payment_data ?? [],
-                            ['reason' => $statusResult['reason'] ?? 'Unknown failure reason']
-                        )
-                    ]);
-                }
-            }
-        }
-
-        return view('donations.confirm', compact('donation'));
-    }
-
-    /**
-     * Callback URL for payment gateway responses
-     */
-    public function callback(Request $request)
-    {
-        // Log the callback data
-        \Log::info('Payment callback received', $request->all());
-
-        $reference = $request->input('reference');
-        $status = $request->input('status');
-        $reason = $request->input('message');
-
-        ddd($request->all());
-
-        if (!$reference) {
-            return response()->json(['status' => 'error', 'message' => 'Missing required parameters'], 400);
-        }
-
-        if ($status === 'SUCCESS') {
-            $success = $this->freeMoPayService->processSuccessfulPayment($reference, $externalId, $amount);
-
-            if ($success) {
-                return response()->json(['status' => 'success', 'message' => 'Payment processed successfully']);
-            }
-        } elseif (in_array($status, ['FAILED', 'CANCELED'])) {
-            $success = $this->freeMoPayService->processFailedPayment($reference, $externalId, $reason);
-
-            if ($success) {
-                return response()->json(['status' => 'success', 'message' => 'Failed payment processed']);
-            }
-        }
-
-        return response()->json(['status' => 'error', 'message' => 'Payment processing failed'], 400);
     }
 
     /**
      * Delete a specific donation.
+     *
+     * @param DeleteDonationRequest $request
+     * @param Donation $donation
+     * @return RedirectResponse
      */
     public function destroy(DeleteDonationRequest $request, Donation $donation): RedirectResponse
     {

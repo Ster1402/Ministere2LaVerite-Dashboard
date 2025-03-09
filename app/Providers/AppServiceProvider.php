@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Commons\SMSMessageFormatter;
+use App\Services\FreeMoPayService;
 use App\Services\messages\ApiMessageService;
 use App\Services\messages\NexahService;
 use App\Services\messages\TwilioService;
@@ -21,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->isLocal()) {
             $this->app->register(IdeHelperServiceProvider::class);
         }
+
+        $this->app->singleton(FreeMoPayService::class, function ($app) {
+            return new FreeMoPayService();
+        });
 
         $this->app->singleton(TwilioService::class, function () {
             return new TwilioService();

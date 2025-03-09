@@ -28,7 +28,18 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @var array<class-string, class-string>
      */
-    protected $policies = [];
+    protected $policies = [
+        'App\Models\Group' => GroupPolicy::class,
+        'App\Models\Message' => MessagePolicy::class,
+        'App\Models\Resource' => ResourcePolicy::class,
+        'App\Models\Media' => MediaPolicy::class,
+        'App\Models\Assembly' => AssemblyPolicy::class,
+        'App\Models\Event' => EventPolicy::class,
+        'App\Models\Sector' => SectorPolicy::class,
+        'App\Models\Subsector' => SubsectorPolicy::class,
+        'App\Models\Transaction' => TransactionPolicy::class,
+        'App\Models\Baptism' => BaptismPolicy::class,
+    ];
 
     /**
      * Register any authentication / authorization services.
@@ -76,5 +87,20 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('subsector.update', [SubsectorPolicy::class, 'update']);
         Gate::define('subsector.delete', [SubsectorPolicy::class, 'delete']);
 
+        Gate::define('message.viewAny', [MessagePolicy::class, 'viewAny']);
+        Gate::define('message.view', [MessagePolicy::class, 'view']);
+        Gate::define('message.create', [MessagePolicy::class, 'create']);
+        Gate::define('message.update', [MessagePolicy::class, 'update']);
+        Gate::define('message.delete', [MessagePolicy::class, 'delete']);
+        Gate::define('message.restore', [MessagePolicy::class, 'restore']);
+        Gate::define('message.forceDelete', [MessagePolicy::class, 'forceDelete']);
+
+        Gate::define('resource.viewAny', [ResourcePolicy::class, 'viewAny']);
+        Gate::define('resource.view', [ResourcePolicy::class, 'view']);
+        Gate::define('resource.create', [ResourcePolicy::class, 'create']);
+        Gate::define('resource.update', [ResourcePolicy::class, 'update']);
+        Gate::define('resource.delete', [ResourcePolicy::class, 'delete']);
+        Gate::define('resource.restore', [ResourcePolicy::class, 'restore']);
+        Gate::define('resource.forceDelete', [ResourcePolicy::class, 'forceDelete']);
     }
 }

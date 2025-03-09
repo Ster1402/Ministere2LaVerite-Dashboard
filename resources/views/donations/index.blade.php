@@ -19,11 +19,9 @@
                 <div class="section-header">
                     <h1>Gestion des dons</h1>
                     <div class="section-header-button">
-                        <button class="btn btn-primary" data-toggle="modal" data-target="#donation-modal">
+                        <a href="{{ route('donations.form') }}" class="btn btn-success btn-sm">
                             <i class="fas fa-hand-holding-heart"></i> Faire un don
-                        </button>
-
-                        <x-donation-modal />
+                        </a>
                     </div>
                     <div class="section-header-breadcrumb">
                         <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>

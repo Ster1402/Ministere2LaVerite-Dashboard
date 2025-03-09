@@ -10,6 +10,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property int|null $master_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Sector|null $master
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Sector> $subsectors
+ * @property-read int|null $subsectors_count
+ * @method static \Database\Factories\SectorFactory factory($count = null, $state = [])
+ * @method static Builder|Sector filter(array $filters)
+ * @method static Builder|Sector newModelQuery()
+ * @method static Builder|Sector newQuery()
+ * @method static Builder|Sector query()
+ * @method static Builder|Sector whereCreatedAt($value)
+ * @method static Builder|Sector whereDescription($value)
+ * @method static Builder|Sector whereId($value)
+ * @method static Builder|Sector whereMasterId($value)
+ * @method static Builder|Sector whereName($value)
+ * @method static Builder|Sector whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Sector extends Model implements ReportableModel
 {
     use HasFactory;

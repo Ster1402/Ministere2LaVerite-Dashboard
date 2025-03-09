@@ -18,7 +18,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $name
@@ -107,6 +107,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read int|null $medias_count
  * @method static Builder|User whereIsDisciplined($value)
  * @method static Builder|User whereProfession($value)
+ * @property string|null $profession_details
+ * @method static Builder|User whereProfessionDetails($value)
  * @mixin \Eloquent
  */
 class User extends Authenticatable implements ReportableModel

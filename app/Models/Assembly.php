@@ -11,6 +11,37 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property int $sector_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Event> $events
+ * @property-read int|null $events_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Media> $medias
+ * @property-read int|null $medias_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messages
+ * @property-read int|null $messages_count
+ * @property-read \App\Models\Sector $sector
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
+ * @method static \Database\Factories\AssemblyFactory factory($count = null, $state = [])
+ * @method static Builder|Assembly filter(array $filters)
+ * @method static Builder|Assembly newModelQuery()
+ * @method static Builder|Assembly newQuery()
+ * @method static Builder|Assembly query()
+ * @method static Builder|Assembly whereCreatedAt($value)
+ * @method static Builder|Assembly whereDescription($value)
+ * @method static Builder|Assembly whereId($value)
+ * @method static Builder|Assembly whereName($value)
+ * @method static Builder|Assembly whereSectorId($value)
+ * @method static Builder|Assembly whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Assembly extends Model implements ReportableModel
 {
     use HasFactory;

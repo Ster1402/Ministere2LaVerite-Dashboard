@@ -8,6 +8,44 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\Reportable;
 
+/**
+ *
+ *
+ * @property int $id
+ * @property string|null $reference
+ * @property string $amount
+ * @property string|null $donor_name
+ * @property string|null $donor_email
+ * @property string|null $donor_phone
+ * @property \Illuminate\Support\Carbon $donation_date
+ * @property string|null $message
+ * @property bool $is_anonymous
+ * @property int|null $user_id
+ * @property int|null $payment_method_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\PaymentMethod|null $paymentMethod
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereDonationDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereDonorEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereDonorName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereDonorPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereIsAnonymous($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation wherePaymentMethodId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereTransactionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereUserId($value)
+ * @mixin \Eloquent
+ */
 class Donation extends Model implements ReportableModel
 {
     use HasFactory;
@@ -15,6 +53,7 @@ class Donation extends Model implements ReportableModel
 
     protected $fillable = [
         'transaction_id',
+        'reference',
         'amount',
         'donor_name',
         'donor_email',
@@ -22,6 +61,9 @@ class Donation extends Model implements ReportableModel
         'donation_date',
         'message',
         'is_anonymous',
+        'is_pending',
+        'is_completed',
+        'is_failed',
         'user_id',
         'payment_method_id',
         'status'
@@ -33,14 +75,6 @@ class Donation extends Model implements ReportableModel
     ];
 
     protected $with = ['user', 'paymentMethod'];
-
-    /**
-     * Get the transaction associated with the donation.
-     */
-    public function transaction(): BelongsTo
-    {
-        return $this->belongsTo(Transaction::class);
-    }
 
     /**
      * Get the user who made the donation.
@@ -127,6 +161,12 @@ class Donation extends Model implements ReportableModel
                 'title' => 'Don anonyme',
                 'data' => function ($donation) {
                     return $donation->is_anonymous ? 'Oui' : 'Non';
+                },
+            ],
+            'reference' => [
+                'title' => 'Référence',
+                'data' => function ($donation) {
+                    return $donation->reference ?? 'Non disponible';
                 },
             ],
             'message' => [
