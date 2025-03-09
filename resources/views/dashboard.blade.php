@@ -27,125 +27,25 @@
                             <!-- Key Metrics Cards -->
                             <div class="metrics-grid">
                                 <!-- Users Stats -->
-                                <div class="metric-card users-card">
-                                    <div class="metric-icon">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div class="metric-content">
-                                        <h3 class="metric-title">Utilisateurs</h3>
-                                        <div class="metric-value">{{ $total ?? '0' }}</div>
-                                        <div class="metric-subtitle">comptes actifs</div>
-                                    </div>
-                                    <div class="metric-chart">
-                                        <!-- Small line chart would go here -->
-                                        <div class="sparkline-chart"></div>
-                                    </div>
-                                </div>
+                                <x-stats-users-panel class="users-card"/>
 
                                 <!-- Resources Stats -->
-                                <div class="metric-card resources-card">
-                                    <div class="metric-icon">
-                                        <i class="fas fa-box-open"></i>
-                                    </div>
-                                    <div class="metric-content">
-                                        <h3 class="metric-title">Ressources</h3>
-                                        <div class="metric-value">{{ $stats['ressources']['total'] ?? '0' }}</div>
-                                        <div class="metric-subtitle">ressources disponibles</div>
-                                    </div>
-                                    <div class="metric-chart">
-                                        <div class="sparkline-chart"></div>
-                                    </div>
-                                </div>
+                                <x-stats-resources-panel class="resources-card"/>
 
                                 <!-- Events Stats -->
-                                <div class="metric-card events-card">
-                                    <div class="metric-icon">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </div>
-                                    <div class="metric-content">
-                                        <h3 class="metric-title">Événements</h3>
-                                        <div class="metric-value">{{ $stats['events']['total'] ?? '0' }}</div>
-                                        <div class="metric-subtitle">événements planifiés</div>
-                                    </div>
-                                    <div class="metric-chart">
-                                        <div class="sparkline-chart"></div>
-                                    </div>
-                                </div>
+                                <x-stats-events-panel class="events-card" />
 
-                                <!-- Account Balance -->
-                                <div class="metric-card balance-card">
-                                    <div class="metric-icon">
-                                        <i class="fas fa-wallet"></i>
-                                    </div>
-                                    <div class="metric-content">
-                                        <h3 class="metric-title">Solde courant</h3>
-                                        <div class="metric-value">{{ number_format($total ?? 0, 0, ',', ' ') }} XAF
-                                        </div>
-                                        <div class="metric-subtitle">disponible maintenant</div>
-                                    </div>
-                                    <a href="#" class="metric-action">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </a>
-                                </div>
                             </div>
                         </div>
 
                         <div class="col-lg-4">
                             <!-- Donation Stats Cards -->
-                            <div class="donation-stats-container">
-                                <h2 class="section-title"><i class="fas fa-chart-line me-2"></i>Statistiques des Dons
-                                </h2>
-
-                                <div class="donation-stat-card total-donations">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-value">{{ number_format($totalAmount ?? 0, 0, ',', ' ') }} XAF
-                                        </div>
-                                        <div class="stat-label">Total des dons</div>
-                                    </div>
-                                    <div class="stat-trend positive">
-                                        <i class="fas fa-arrow-up"></i> 5.2%
-                                    </div>
-                                </div>
-
-                                <div class="donation-stat-card completed-donations">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-check-circle"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-value">{{ $donationsCount ?? 0 }}</div>
-                                        <div class="stat-label">Dons reçus</div>
-                                    </div>
-                                    <div class="stat-trend positive">
-                                        <i class="fas fa-arrow-up"></i> 3.1%
-                                    </div>
-                                </div>
-
-                                <div class="donation-stat-card pending-donations">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-value">{{ $pendingCount ?? 0 }}</div>
-                                        <div class="stat-label">Dons en attente</div>
-                                    </div>
-                                    <div class="stat-trend neutral">
-                                        <i class="fas fa-minus"></i> 0%
-                                    </div>
-                                </div>
-
-                                <div class="call-to-action">
-                                    <a href="{{ route('donations.form') }}" class="btn-donate">
-                                        <i class="fas fa-heart me-2"></i> Faire un don maintenant
-                                    </a>
-                                </div>
-                            </div>
+                            <x-donation-stats />
                         </div>
+
+
                     </div>
                 </div>
-                
                 <x-recent-donations />
 
             </div>

@@ -137,7 +137,7 @@ class Donation extends Model implements ReportableModel
             'payment_method' => [
                 'title' => 'Méthode de paiement',
                 'data' => function ($donation) {
-                    return $donation->paymentMethod ? $donation->paymentMethod->name : 'Non spécifié';
+                    return $donation->paymentMethod ? $donation->paymentMethod->display_name : 'Non spécifié';
                 },
             ],
             'user' => [

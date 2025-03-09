@@ -1,1 +1,1 @@
-<x-stats-panel title="{{ __('Statistiques des évèments') }}" slug="events" :statItems="$stats" />
+<x-stats-panel  icon="fa-calendar-alt" title="{{ __('Statistiques des évèments') }}" slug="events" :statItems="$stats" />

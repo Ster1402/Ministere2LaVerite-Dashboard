@@ -19,6 +19,7 @@ use App\Http\Controllers\SubsectorController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AddUserToAssemblyController;
+use App\Http\Controllers\LogController;
 use App\Models\Assembly;
 use App\Models\Resource;
 use Illuminate\Support\Facades\Artisan;
@@ -60,6 +61,7 @@ Route::prefix('donations')->name('donations.')->group(function () {
 
     // Donation confirmation page
     Route::get('/confirmation/{id}', [DonationController::class, 'showConfirmation'])->name('confirmation');
+    Route::get('/confirmation/{id}', [DonationController::class, 'showConfirmation'])->name('confirm');
 
     // FreeMoPay callback URL
     Route::post('/callback', [DonationController::class, 'handleCallback'])->name('callback');
@@ -95,6 +97,16 @@ Route::middleware([
     Route::get('/journal', function () {
         return view('journal');
     })->name('journal');
+
+    // Journal des logs
+    Route::get('journal', [LogController::class, 'index'])->name('journal');
+    Route::get('journal/export', [LogController::class, 'export'])->name('journal.export');
+
+    // API des logs
+    Route::prefix('api')->group(function () {
+        Route::get('logs/{id}', [LogController::class, 'show']);
+        Route::get('logs/counts', [LogController::class, 'getCounts']);
+    });
 
     Route::get('/profile', function () {
         return view('users.show', ['user' => Auth::user()]);

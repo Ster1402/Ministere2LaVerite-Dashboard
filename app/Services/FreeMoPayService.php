@@ -272,7 +272,7 @@ class FreeMoPayService
                 [
                     'amount' => $donation->amount,
                     'currency' => 'XAF', // Default currency based on your code
-                    'comment' => 'Online donation via ' . ($donation->paymentMethod ? $donation->paymentMethod->name : 'FreeMoPay'),
+                    'comment' => 'Online donation via ' . ($donation->paymentMethod ? $donation->paymentMethod->display_name : 'FreeMoPay'),
                     'user_id' => $donation->user_id,
                     'donor_name' => $donation->donor_name,
                     'donor_email' => $donation->donor_email,

@@ -79,8 +79,7 @@
                                         <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
                                         <input id="amount" type="number"
                                             class="form-control form-control-lg @error('amount') is-invalid @enderror"
-                                            name="amount" value="{{ old('amount', 10000) }}" required min="100"
-                                            step="100">
+                                            name="amount" value="{{ old('amount', 0) }}" required min="5">
                                         <span class="input-group-text">XAF</span>
 
                                         @error('amount')
