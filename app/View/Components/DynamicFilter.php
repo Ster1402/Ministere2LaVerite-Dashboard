@@ -2,7 +2,6 @@
 
 namespace App\View\Components;
 
-use App\Services\ReportingService;
 use Illuminate\View\Component;
 
 class DynamicFilter extends Component
@@ -12,6 +11,9 @@ class DynamicFilter extends Component
     public $operators;
     public $filters;
     public $index;
+    public $selectedField;
+    public $selectedOperator;
+    public $filterValue;
 
     /**
      * Create a new component instance.
@@ -20,7 +22,7 @@ class DynamicFilter extends Component
      * @param array $attributes
      * @param array $operators
      * @param array $filters
-     * @param int $index
+     * @param int|string $index
      * @return void
      */
     public function __construct($modelName, $attributes = [], $operators = [], $filters = [], $index = 0)
@@ -31,40 +33,31 @@ class DynamicFilter extends Component
         $this->filters = $filters;
         $this->index = $index;
 
-        // If attributes and operators are not provided, try to load them
-        if (empty($this->attributes) || empty($this->operators)) {
-            $this->loadAttributesAndOperators();
-        }
-    }
-
-    /**
-     * Load attributes and operators from the model
-     */
-    protected function loadAttributesAndOperators()
-    {
-        $reportingService = app(ReportingService::class);
-        $modelClass = $this->getModelClass($this->modelName);
-
-        if ($modelClass && class_exists($modelClass) && $reportingService->isFilterable($modelClass)) {
-            $this->attributes = $reportingService->getFilterableAttributes($modelClass);
-            $this->operators = $reportingService->getFilterOperators($modelClass);
+        // Extract values from filters if they exist
+        if (isset($filters[$index])) {
+            $this->selectedField = $filters[$index]['field'] ?? null;
+            $this->selectedOperator = $filters[$index]['operator'] ?? null;
+            $this->filterValue = $filters[$index]['value'] ?? null;
         } else {
-            $this->attributes = [];
-            $this->operators = [];
+            $this->selectedField = null;
+            $this->selectedOperator = null;
+            $this->filterValue = null;
         }
     }
 
     /**
-     * Get the model class from the model name.
+     * Get operators for a specific field type.
      *
-     * @param string $modelName
-     * @return string|null
+     * @param string $type
+     * @return array
      */
-    private function getModelClass($modelName)
+    public function getOperatorsForType($type)
     {
-        $reportingService = app(ReportingService::class);
-        $reportableModels = $reportingService->getReportableModels();
-        return $reportableModels[$modelName] ?? null;
+        if (empty($this->operators) || !isset($this->operators[$type])) {
+            return [];
+        }
+
+        return $this->operators[$type];
     }
 
     /**
@@ -74,6 +67,14 @@ class DynamicFilter extends Component
      */
     public function render()
     {
-        return view('components.dynamic-filter');
+        return view('components.dynamic-filter', [
+            'modelName' => $this->modelName,
+            'attributes' => $this->attributes,
+            'operators' => $this->operators,
+            'index' => $this->index,
+            'selectedField' => $this->selectedField,
+            'selectedOperator' => $this->selectedOperator,
+            'filterValue' => $this->filterValue
+        ]);
     }
 }
