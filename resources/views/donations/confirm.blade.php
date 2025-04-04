@@ -133,6 +133,28 @@
         </div>
     </div>
 
+    // JavaScript for the confirmation page (add to the donation.confirm.blade.php)
+    <script>
+        $(document).ready(function() {
+            // Only run this for pending payments
+            if ("{{ $donation->status }}" === "pending") {
+                // Set a timeout to check payment status if no update occurs
+                let paymentTimeout = setTimeout(function() {
+                    // Reload the page to trigger a status check
+                    window.location.reload();
+                }, 30000); // 30 seconds
+
+                // If the user manually checks status, clear the timeout
+                $('#check-status').click(function() {
+                    clearTimeout(paymentTimeout);
+                    $(this).prop('disabled', true).html(
+                        '<i class="fas fa-spinner fa-spin"></i> Vérification...');
+                    window.location.reload();
+                });
+            }
+        });
+    </script>
+
     @if ($donation->status === 'pending')
         @push('scripts')
             <script>

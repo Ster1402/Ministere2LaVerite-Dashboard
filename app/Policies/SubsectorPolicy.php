@@ -11,7 +11,7 @@ class SubsectorPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): Response
+    public function viewAny(User $user, $model = null): Response
     {
         if ($user->isAdmin() || $user->roles->contains('name', Roles::$SUBSECTOR_ADMIN)) {
             return Response::allow();

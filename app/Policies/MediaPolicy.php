@@ -12,12 +12,12 @@ class MediaPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): Response
+    public function viewAny(User $user, $model = null): Response
     {
         if ($user->isAdmin() || $user->roles->contains('name', Roles::$MEDIA_MANAGER)) {
-            return Response::allow();
+            return Response::allow('You are authorized to view this page');
         } else {
-            return Response::deny('You are not authorized to perform this action.');
+            return Response::deny('You are not authorized to view this page');
         }
     }
 
@@ -27,9 +27,9 @@ class MediaPolicy
     public function view(User $user): Response
     {
         if ($user->isAdmin() || $user->roles->contains('name', Roles::$MEDIA_MANAGER)) {
-            return Response::allow();
+            return Response::allow('You are authorized to view this page');
         } else {
-            return Response::deny('You are not authorized to perform this action.');
+            return Response::deny('You are not authorized to view this page');
         }
     }
 

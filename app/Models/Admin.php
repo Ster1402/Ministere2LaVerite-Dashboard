@@ -2,6 +2,37 @@
 
 namespace App\Models;
 
+/**
+ * 
+ *
+ * @property-read \App\Models\Assembly|null $assembly
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Baptism> $baptisms
+ * @property-read int|null $baptisms_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Event> $events
+ * @property-read int|null $events_count
+ * @property-read string $profile_photo_url
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Media> $medias
+ * @property-read int|null $medias_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messagesReceived
+ * @property-read int|null $messages_received_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messagesSent
+ * @property-read int|null $messages_sent_count
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Resource> $resources
+ * @property-read int|null $resources_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Roles> $roles
+ * @property-read int|null $roles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Transaction> $transactions
+ * @property-read int|null $transactions_count
+ * @method static Builder|User filter(array $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin query()
+ * @mixin \Eloquent
+ */
 class Admin extends User
 {
     /**

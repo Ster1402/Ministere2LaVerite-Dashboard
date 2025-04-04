@@ -11,6 +11,37 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
 use Carbon\Carbon;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $title
+ * @property string $status unavailable | ongoing | ended
+ * @property string|null $description
+ * @property \Illuminate\Support\Carbon|null $from
+ * @property \Illuminate\Support\Carbon|null $to
+ * @property int|null $user_id Creator of the event
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
+ * @property-read int|null $assemblies_count
+ * @property-read \App\Models\User|null $user
+ * @method static \Database\Factories\EventFactory factory($count = null, $state = [])
+ * @method static Builder|Event filter(array $filters)
+ * @method static Builder|Event newModelQuery()
+ * @method static Builder|Event newQuery()
+ * @method static Builder|Event query()
+ * @method static Builder|Event whereCreatedAt($value)
+ * @method static Builder|Event whereDescription($value)
+ * @method static Builder|Event whereFrom($value)
+ * @method static Builder|Event whereId($value)
+ * @method static Builder|Event whereStatus($value)
+ * @method static Builder|Event whereTitle($value)
+ * @method static Builder|Event whereTo($value)
+ * @method static Builder|Event whereUpdatedAt($value)
+ * @method static Builder|Event whereUserId($value)
+ * @mixin \Eloquent
+ */
 class Event extends Model implements ReportableModel
 {
     use HasFactory;

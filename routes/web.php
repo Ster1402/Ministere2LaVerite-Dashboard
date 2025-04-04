@@ -1,10 +1,30 @@
 <?php
 
-use App\Http\Controllers\BulkMessageController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AssemblyController;
+use App\Http\Controllers\BaptismController;
+use App\Http\Controllers\BorrowedController;
+use App\Http\Controllers\BorrowedResourceController;
+use App\Http\Controllers\DonationController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SectorController;
+use App\Http\Controllers\SubsectorController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AddUserToAssemblyController;
+use App\Http\Controllers\LogController;
 use App\Models\Assembly;
 use App\Models\Resource;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DonationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,56 +37,59 @@ use App\Http\Controllers\DonationController;
 |
 */
 
-// Donation Routes (all users)
-Route::get('/donations', [DonationController::class, 'index'])->name('donations.index');
-Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
-Route::get('/donations/{donation}/confirm', [DonationController::class, 'confirm'])->name('donations.confirm');
+// Public routes - accessible without authentication
+Route::get('/', function () {
+    return Auth::check() ? redirect('dashboard') : redirect('login');
+});
 
-// Routes for donations - accessible to everyone, no auth required
-Route::post('/donations', [App\Http\Controllers\DonationController::class, 'store'])->name('donations.store');
+// In routes/web.php
+Route::post('/', [DonationController::class, 'processDonation'])
+    ->name('process')
+    ->middleware('throttle:10,1'); // 10 submissions per minute
 
-// Routes for payment method validation
-Route::post('/payment-methods/validate-phone', [App\Http\Controllers\PaymentMethodController::class, 'validatePhone'])
+// Payment and donation routes with public access
+// Donation routes
+Route::prefix('donations')->name('donations.')->group(function () {
+    // Show donation form
+    Route::get('/list', [DonationController::class, 'index'])->name('index');
+
+    // Show donation form
+    Route::get('/', [DonationController::class, 'showDonationForm'])->name('form');
+
+    // Process donation
+    Route::post('/', [DonationController::class, 'processDonation'])->name('process');
+
+    // Donation confirmation page
+    Route::get('/confirmation/{id}', [DonationController::class, 'showConfirmation'])->name('confirmation');
+    Route::get('/confirmation/{id}', [DonationController::class, 'showConfirmation'])->name('confirm');
+
+    // FreeMoPay callback URL
+    Route::post('/callback', [DonationController::class, 'handleCallback'])->name('callback');
+
+    // Check donation status (AJAX)
+    Route::post('/check-status', [DonationController::class, 'checkDonationStatus'])->name('check-status');
+
+    // Cancel donation (AJAX)
+    Route::post('/cancel', [DonationController::class, 'cancelDonation'])->name('cancel');
+
+    // My donations (requires auth)
+    Route::get('/my-donations', [DonationController::class, 'showMyDonations'])
+        ->middleware('auth')
+        ->name('my');
+});
+
+// Payment method validation endpoint
+Route::post('/payment-methods/validate-phone', [PaymentMethodController::class, 'validatePhone'])
     ->name('payment-methods.validate-phone');
 
-// Public callback route for FreeMoPay
-Route::post('/donations/callback', [DonationController::class, 'callback'])->name('donations.callback');
-
-// Report routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/reports/model-data', [App\Http\Controllers\ReportController::class, 'getModelData'])->name('reports.model-data');
-});
-
-// Report routes
-Route::middleware(['auth'])->group(function () {
-    Route::post('/reports/generate', [App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
-});
-
-Route::get('/dangerous-update-force', function () {
-    Artisan::Call('migrate --force');
-    Artisan::Call('db:seed');
-    Artisan::Call('db:seed --class=PaymentMethodSeeder');
-    Artisan::Call('db:seed --class=RolesSeeder');
-
-    return redirect(\route('dashboard'));
-});
-
+// Authentication required routes
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
 
-    Route::get('/storage-link', function () {
-        Artisan::Call('storage:unlink');
-        Artisan::Call('storage:link');
-        return view('dashboard');
-    });
-
-    Route::get('/', function () {
-        return view('dashboard');
-    });
-
+    // Dashboard and general pages
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -75,30 +98,70 @@ Route::middleware([
         return view('journal');
     })->name('journal');
 
+    // Journal des logs
+    Route::get('journal', [LogController::class, 'index'])->name('journal');
+    Route::get('journal/export', [LogController::class, 'export'])->name('journal.export');
+
+    // API des logs
+    Route::prefix('api')->group(function () {
+        Route::get('logs/{id}', [LogController::class, 'show']);
+        Route::get('logs/counts', [LogController::class, 'getCounts']);
+    });
+
     Route::get('/profile', function () {
         return view('users.show', ['user' => Auth::user()]);
     })->name('profile');
 
-    Route::get('/log', function () {
-        return view('log');
-    })->name('log');
+    // Reports and export routes
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/model-data', [ReportController::class, 'getModelData'])->name('model-data');
+        Route::post('/generate', [ReportController::class, 'generate'])->name('generate');
+    });
 
-    Route::resource('users', App\Http\Controllers\UserController::class);
-    Route::resource('admins', App\Http\Controllers\AdminController::class);
-    Route::resource('events', App\Http\Controllers\EventController::class);
-    Route::resource('groups', App\Http\Controllers\GroupController::class);
-    Route::resource('sectors', App\Http\Controllers\SectorController::class);
-    Route::resource('subsectors', App\Http\Controllers\SubsectorController::class);
-    Route::resource('messages', App\Http\Controllers\MessageController::class);
-    Route::resource('resources', App\Http\Controllers\ResourceController::class);
-    Route::resource('medias', App\Http\Controllers\MediaController::class);
-    Route::resource('assemblies', App\Http\Controllers\AssemblyController::class);
+    // Resource management routes
+    Route::resources([
+        'users' => UserController::class,
+        'admins' => AdminController::class,
+        'events' => EventController::class,
+        'groups' => GroupController::class,
+        'sectors' => SectorController::class,
+        'subsectors' => SubsectorController::class,
+        'messages' => MessageController::class,
+        'resources' => ResourceController::class,
+        'medias' => MediaController::class,
+        'assemblies' => AssemblyController::class,
+    ]);
 
-    Route::post('/assemblies/{assembly}/users', App\Http\Controllers\AddUserToAssemblyController::class)
-        ->name('assemblies.users.store')->can('update', Assembly::class);
+    // Protected donation routes (delete operations require auth)
+    Route::resource('donations', DonationController::class)->only(['destroy']);
 
-    Route::post('/resources/{resource}/users', App\Http\Controllers\BorrowedResourceController::class)
-        ->name('resources.users.borrow')->can('update', Resource::class);
+    // Custom relationships and actions
+    Route::post('/assemblies/{assembly}/users', AddUserToAssemblyController::class)
+        ->name('assemblies.users.store')
+        ->can('update', Assembly::class);
 
-    Route::resource('donations', DonationController::class)->except(['show']);
+    Route::post('/resources/{resource}/users', BorrowedResourceController::class)
+        ->name('resources.users.borrow')
+        ->can('update', Resource::class);
+});
+
+// Administrative routes (should be protected by admin middleware in a real app)
+Route::middleware(['auth:sanctum'])->prefix('admin')->name('admin.')->group(function () {
+    // System maintenance route - should be restricted to super admins
+    Route::get('/dangerous-update-force', function () {
+        Artisan::call('migrate --force');
+        Artisan::call('db:seed');
+        Artisan::call('db:seed --class=PaymentMethodSeeder');
+        Artisan::call('db:seed --class=RolesSeeder');
+
+        return redirect()->route('dashboard')->with('success', 'System updated successfully.');
+    })->name('dangerous-update');
+
+    // Storage link route - should be restricted to super admins
+    Route::get('/storage-link', function () {
+        Artisan::call('storage:unlink');
+        Artisan::call('storage:link');
+
+        return redirect()->route('dashboard')->with('success', 'Storage linked successfully.');
+    })->name('storage-link');
 });

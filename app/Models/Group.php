@@ -9,6 +9,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Traits\Reportable;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Resource> $resources
+ * @property-read int|null $resources_count
+ * @method static \Database\Factories\GroupFactory factory($count = null, $state = [])
+ * @method static Builder|Group filter(array $filters)
+ * @method static Builder|Group newModelQuery()
+ * @method static Builder|Group newQuery()
+ * @method static Builder|Group query()
+ * @method static Builder|Group whereCreatedAt($value)
+ * @method static Builder|Group whereDescription($value)
+ * @method static Builder|Group whereId($value)
+ * @method static Builder|Group whereName($value)
+ * @method static Builder|Group whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Group extends Model implements ReportableModel
 {
     use HasFactory;

@@ -10,6 +10,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $name
+ * @property int $quantity
+ * @property string|null $description
+ * @property int $group_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Group $group
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
+ * @method static \Database\Factories\ResourceFactory factory($count = null, $state = [])
+ * @method static Builder|Resource filter(array $filters)
+ * @method static Builder|Resource newModelQuery()
+ * @method static Builder|Resource newQuery()
+ * @method static Builder|Resource query()
+ * @method static Builder|Resource whereCreatedAt($value)
+ * @method static Builder|Resource whereDescription($value)
+ * @method static Builder|Resource whereGroupId($value)
+ * @method static Builder|Resource whereId($value)
+ * @method static Builder|Resource whereName($value)
+ * @method static Builder|Resource whereQuantity($value)
+ * @method static Builder|Resource whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Resource extends Model implements ReportableModel
 {
     use HasFactory;

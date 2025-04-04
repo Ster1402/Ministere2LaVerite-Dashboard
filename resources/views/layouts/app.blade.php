@@ -34,11 +34,17 @@
     <link rel="stylesheet" href="/assets/css/components.css">
     <link rel="stylesheet" href="/assets/css/custom.css">
     <link rel="icon" href="/assets/img/admin.png">
+
+    @stack('styles')
+
     <!-- Start GA -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-94034622-3"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
         gtag('js', new Date());
 
         gtag('config', 'UA-94034622-3');
@@ -48,66 +54,67 @@
 
 <body class="antialiased">
 
-<div id="app">
+    <div id="app">
 
-    <!-- Page Content -->
-    <div class="main-wrapper main-wrapper-1">
-        <x-nav-bar/>
-        <x-sidebar/>
+        <!-- Page Content -->
+        <div class="main-wrapper main-wrapper-1">
+            <x-sidebar />
 
-        <main class="main-content">
-            <section class="section">
-                @if(isset($header))
-                    {{ $header }}
-                @endif
-
-                <div class="section-body">
-                    @if(isset($subtitle))
-                        <h2 class="section-title">{{ $subtitle }}</h2>
+            <main class="main-content">
+                <section class="section">
+                    @if (isset($header))
+                        {{ $header }}
                     @endif
-                    <x-validation-errors />
 
-                    {{ $slot }}
-                </div>
-            </section>
-        </main>
+                    <div class="section-body">
+                        @if (isset($subtitle))
+                            <h2 class="section-title">{{ $subtitle }}</h2>
+                        @endif
+                        <x-validation-errors />
 
-        <x-footer/>
+                        {{ $slot }}
+                    </div>
+                </section>
+            </main>
+
+            <x-footer />
+        </div>
+
     </div>
 
-</div>
+    <!-- General JS Scripts -->
+    <script src="/assets/modules/jquery.min.js"></script>
+    <script src="/assets/modules/popper.js"></script>
+    <script src="/assets/modules/tooltip.js"></script>
+    <script src="/assets/modules/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/assets/modules/nicescroll/jquery.nicescroll.min.js"></script>
+    <script src="/assets/modules/moment.min.js"></script>
+    <script src="/assets/js/stisla.js"></script>
 
-<!-- General JS Scripts -->
-<script src="/assets/modules/jquery.min.js"></script>
-<script src="/assets/modules/popper.js"></script>
-<script src="/assets/modules/tooltip.js"></script>
-<script src="/assets/modules/bootstrap/js/bootstrap.min.js"></script>
-<script src="/assets/modules/nicescroll/jquery.nicescroll.min.js"></script>
-<script src="/assets/modules/moment.min.js"></script>
-<script src="/assets/js/stisla.js"></script>
+    <!-- JS Libraies -->
+    <script src="/assets/modules/jquery-ui/jquery-ui.min.js"></script>
 
-<!-- JS Libraies -->
-<script src="/assets/modules/jquery-ui/jquery-ui.min.js"></script>
+    <!-- Page Specific JS File -->
+    <script src="/assets/js/page/bootstrap-modal_admin_page.js"></script>
+    <script src="/assets/js/page/components-table.js"></script>
+    <script src="/assets/modules/jquery.sparkline.min.js"></script>
+    <script src="/assets/modules/chart.min.js"></script>
+    <script src="/assets/modules/owlcarousel2/dist/owl.carousel.min.js"></script>
+    <script src="/assets/modules/summernote/summernote-bs4.js"></script>
+    <script src="/assets/modules/chocolat/dist/js/jquery.chocolat.min.js"></script>
+    <script src="/assets/js/page/forms-advanced-forms.js"></script>
+    <script src="/assets/modules/select2/dist/js/select2.full.min.js"></script>
+    <script src="/assets/modules/jquery-selectric/jquery.selectric.min.js"></script>
 
-<!-- Page Specific JS File -->
-<script src="/assets/js/page/bootstrap-modal_admin_page.js"></script>
-<script src="/assets/js/page/components-table.js"></script>
-<script src="/assets/modules/jquery.sparkline.min.js"></script>
-<script src="/assets/modules/chart.min.js"></script>
-<script src="/assets/modules/owlcarousel2/dist/owl.carousel.min.js"></script>
-<script src="/assets/modules/summernote/summernote-bs4.js"></script>
-<script src="/assets/modules/chocolat/dist/js/jquery.chocolat.min.js"></script>
-<script src="/assets/js/page/forms-advanced-forms.js"></script>
-<script src="/assets/modules/select2/dist/js/select2.full.min.js"></script>
-<script src="/assets/modules/jquery-selectric/jquery.selectric.min.js"></script>
+    <!-- Page Specific JS File -->
+    <script src="/assets/js/page/index.js"></script>
 
-<!-- Page Specific JS File -->
-<script src="/assets/js/page/index.js"></script>
-
-<!-- Template JS File -->
-<script src="/assets/js/scripts.js"></script>
-<script src="/assets/js/custom.js"></script>
-
+    <!-- Template JS File -->
+    <script src="/assets/js/scripts.js"></script>
+    <script src="/assets/js/custom.js"></script>
+    <!-- Before end of body -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 </body>
 
 </html>

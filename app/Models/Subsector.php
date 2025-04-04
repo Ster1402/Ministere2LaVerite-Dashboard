@@ -6,6 +6,18 @@ use App\Interfaces\ReportableModel;
 use App\Traits\Reportable;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * 
+ *
+ * @property-read \App\Models\Sector|null $master
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Sector> $subsectors
+ * @property-read int|null $subsectors_count
+ * @method static Builder|Subsector filter(array $filters)
+ * @method static Builder|Subsector newModelQuery()
+ * @method static Builder|Subsector newQuery()
+ * @method static Builder|Subsector query()
+ * @mixin \Eloquent
+ */
 class Subsector extends Sector implements ReportableModel
 {
     use Reportable;
