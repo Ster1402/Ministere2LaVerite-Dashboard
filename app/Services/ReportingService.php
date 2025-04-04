@@ -6,7 +6,7 @@ use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use App\Exceptions\ReportGenerationException;
+// use App\Exceptions\ReportGenerationException;
 
 class ReportingService
 {
@@ -30,7 +30,7 @@ class ReportingService
         $orientation = 'portrait'
     ) {
         if (!$this->isReportable($modelClass)) {
-            throw new ReportGenerationException("The model {$modelClass} is not reportable");
+            // throw new ReportGenerationException("The model {$modelClass} is not reportable");
         }
 
         // Get the report title

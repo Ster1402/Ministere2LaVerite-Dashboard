@@ -12,16 +12,18 @@ class ReportModal extends Component
     public $paperSizes;
     public $orientations;
     public $columns;
+    public $filters;
 
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($modelName, $title = null)
+    public function __construct($modelName, $title = null, $filters = [])
     {
         $this->modelName = $modelName;
         $this->title = $title ?: 'Exporter les données';
+        $this->filters = $filters;
 
         $reportingService = app(ReportingService::class);
         $this->paperSizes = $reportingService->getPaperSizeOptions();
@@ -44,6 +46,19 @@ class ReportModal extends Component
     public function render()
     {
         return view('components.report-modal');
+    }
+
+    /**
+     * Check if the model is filterable.
+     *
+     * @return bool
+     */
+    public function isFilterable()
+    {
+        $reportingService = app(ReportingService::class);
+        $modelClass = $this->getModelClass($this->modelName);
+
+        return $modelClass && class_exists($modelClass) && $reportingService->isFilterable($modelClass);
     }
 
     /**

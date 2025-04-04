@@ -1,12 +1,14 @@
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title-wrapper">
                     <i class="fas fa-file-export modal-icon"></i>
                     <h5 class="modal-title" id="reportModalLabel">{{ $title }}</h5>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="reportForm" class="needs-validation" method="POST" action="{{ route('reports.generate') }}"
@@ -15,74 +17,135 @@
                     <input type="hidden" name="model" value="{{ $modelName }}">
 
                     <div class="report-options">
-                        <div class="form-section">
-                            <h6 class="section-title">Options d'export</h6>
+                        <!-- Tab navigation for Format and Filters -->
+                        <ul class="nav nav-tabs mb-3" id="reportTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="format-tab" data-toggle="tab" href="#format-panel"
+                                    role="tab" aria-controls="format-panel" aria-selected="true">
+                                    <i class="fas fa-file-alt me-1"></i> Format
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="filters-tab" data-toggle="tab" href="#filters-panel"
+                                    role="tab" aria-controls="filters-panel" aria-selected="false">
+                                    <i class="fas fa-filter me-1"></i> Filtres
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="columns-tab" data-toggle="tab" href="#columns-panel"
+                                    role="tab" aria-controls="columns-panel" aria-selected="false">
+                                    <i class="fas fa-columns me-1"></i> Colonnes
+                                </a>
+                            </li>
+                        </ul>
 
-                            <div class="mb-3">
-                                <label for="format" class="form-label">Format d'export</label>
-                                <div class="format-selector">
-                                    <div class="format-option">
-                                        <input type="radio" class="btn-check d-contents" name="format"
-                                            id="format-pdf" value="pdf" checked>
-                                        <label class="btn format-btn" for="format-pdf">
-                                            <i class="fas fa-file-pdf"></i>
-                                            <span>PDF</span>
-                                        </label>
+                        <!-- Tab content -->
+                        <div class="tab-content" id="reportTabsContent">
+                            <!-- Format Tab -->
+                            <div class="tab-pane fade show active" id="format-panel" role="tabpanel"
+                                aria-labelledby="format-tab">
+                                <div class="form-section">
+                                    <h6 class="section-title">Options d'export</h6>
+
+                                    <div class="mb-3">
+                                        <label for="format" class="form-label">Format d'export</label>
+                                        <div class="format-selector">
+                                            <div class="format-option">
+                                                <input type="radio" class="btn-check d-contents" name="format"
+                                                    id="format-pdf" value="pdf" checked>
+                                                <label class="btn format-btn" for="format-pdf">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <span>PDF</span>
+                                                </label>
+                                            </div>
+                                            <div class="format-option">
+                                                <input type="radio" class="btn-check d-contents" name="format"
+                                                    id="format-excel" value="excel">
+                                                <label class="btn format-btn" for="format-excel">
+                                                    <i class="fas fa-file-excel"></i>
+                                                    <span>Excel</span>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="format-option">
-                                        <input type="radio" class="btn-check d-contents" name="format"
-                                            id="format-excel" value="excel">
-                                        <label class="btn format-btn" for="format-excel">
-                                            <i class="fas fa-file-excel"></i>
-                                            <span>Excel</span>
-                                        </label>
+
+                                    <div class="paper-options" id="pdf-options">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="paper_size" class="form-label">Format de papier</label>
+                                                <select id="paper_size" name="paper_size" class="form-select">
+                                                    @foreach ($paperSizes as $value => $label)
+                                                        <option value="{{ $value }}">{{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="orientation" class="form-label">Orientation</label>
+                                                <select id="orientation" name="orientation" class="form-select">
+                                                    @foreach ($orientations as $value => $label)
+                                                        <option value="{{ $value }}">{{ $label }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="paper-options" id="pdf-options">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="paper_size" class="form-label">Format de papier</label>
-                                        <select id="paper_size" name="paper_size" class="form-select">
-                                            @foreach ($paperSizes as $value => $label)
-                                                <option value="{{ $value }}">{{ $label }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="orientation" class="form-label">Orientation</label>
-                                        <select id="orientation" name="orientation" class="form-select">
-                                            @foreach ($orientations as $value => $label)
-                                                <option value="{{ $value }}">{{ $label }}</option>
-                                            @endforeach
-                                        </select>
+                            <!-- Filters Tab -->
+                            <div class="tab-pane fade" id="filters-panel" role="tabpanel"
+                                aria-labelledby="filters-tab">
+                                <div class="form-section">
+                                    <h6 class="section-title">Filtrer les données</h6>
+                                    <div id="dynamic-filters-container">
+                                        <!-- Dynamic filters will be loaded here via AJAX -->
+                                        <div class="loading-filters text-center py-4">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="sr-only">Loading...</span>
+                                            </div>
+                                            <p class="mt-2">Chargement des filtres...</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="form-section">
-                            <h6 class="section-title">Données à inclure</h6>
+                            <!-- Columns Tab -->
+                            <div class="tab-pane fade" id="columns-panel" role="tabpanel"
+                                aria-labelledby="columns-tab">
+                                <div class="form-section">
+                                    <h6 class="section-title">Données à inclure</h6>
 
-                            <div class="mb-3">
-                                <label for="reportColumns" class="form-label">Sélection des colonnes</label>
-                                <select name="columns[]" class="form-control w-full select2" multiple
-                                    id="reportColumns">
-                                    @foreach ($columns as $key => $column)
-                                        <option value="{{ $key }}">{{ $column['title'] }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>Sélectionnez les colonnes à inclure dans le
-                                    rapport
+                                    <div class="mb-3">
+                                        <label for="reportColumns" class="form-label">Sélection des colonnes</label>
+                                        <div class="column-actions mb-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                id="selectAllColumns">
+                                                <i class="fas fa-check-square me-1"></i> Tout sélectionner
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                id="deselectAllColumns">
+                                                <i class="fas fa-square me-1"></i> Tout désélectionner
+                                            </button>
+                                        </div>
+                                        <select name="columns[]" class="form-control select2" multiple
+                                            id="reportColumns">
+                                            @foreach ($columns as $key => $column)
+                                                <option value="{{ $key }}">{{ $column['title'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>Sélectionnez les colonnes à inclure
+                                            dans le rapport
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
                             <i class="fas fa-times me-1"></i>Annuler
                         </button>
                         <button type="submit" class="btn btn-primary">
@@ -127,19 +190,41 @@
         font-size: 1.25rem;
     }
 
-    #reportModal .btn-close {
+    #reportModal .close {
         color: white;
-        background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3E%3Cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3E%3C/svg%3E") center/1em auto no-repeat;
         opacity: 0.8;
         transition: opacity 0.2s;
     }
 
-    #reportModal .btn-close:hover {
+    #reportModal .close:hover {
         opacity: 1;
     }
 
     #reportModal .modal-body {
         padding: 1.5rem;
+    }
+
+    #reportTabs .nav-link {
+        color: #64748b;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        border-radius: 0.375rem 0.375rem 0 0;
+        transition: all 0.2s ease;
+    }
+
+    #reportTabs .nav-link:hover {
+        color: #334155;
+        background-color: #f8fafc;
+    }
+
+    #reportTabs .nav-link.active {
+        color: #3b82f6;
+        border-color: #e2e8f0 #e2e8f0 #ffffff;
+        font-weight: 600;
+    }
+
+    #reportTabs .nav-link i {
+        margin-right: 0.5rem;
     }
 
     .report-options {
@@ -321,11 +406,90 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+    /* Filter Styles */
+    .filter-row {
+        background-color: white;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+    }
+
+    .filter-row:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    }
+
+    .filters-container {
+        max-height: 350px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .filters-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .filters-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+
+    .filters-container::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .filter-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .filter-actions-left,
+    .filter-actions-right {
+        display: flex;
+        gap: 8px;
+    }
+
+    .remove-filter {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fee2e2;
+        color: #ef4444;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    .remove-filter:hover {
+        background-color: #fecaca;
+        color: #dc2626;
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 767px) {
         .format-selector {
             flex-direction: column;
             gap: 0.5rem;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-actions-left,
+        .filter-actions-right {
+            width: 100%;
         }
     }
 </style>
@@ -356,45 +520,331 @@
         const deselectAllBtn = document.getElementById('deselectAllColumns');
         const columnsSelect = document.getElementById('reportColumns');
 
-        selectAllBtn.addEventListener('click', function() {
-            Array.from(columnsSelect.options).forEach(option => {
-                option.selected = true;
+        if (selectAllBtn && deselectAllBtn && columnsSelect) {
+            selectAllBtn.addEventListener('click', function() {
+                Array.from(columnsSelect.options).forEach(option => {
+                    option.selected = true;
+                });
+                // Trigger change event for Select2 if used
+                $(columnsSelect).trigger('change');
             });
+
+            deselectAllBtn.addEventListener('click', function() {
+                Array.from(columnsSelect.options).forEach(option => {
+                    option.selected = false;
+                });
+                // Trigger change event for Select2 if used
+                $(columnsSelect).trigger('change');
+            });
+        }
+
+        // Initialize Select2 if available
+        if (typeof $.fn.select2 !== 'undefined') {
+            $('#reportColumns').select2({
+                placeholder: 'Sélectionnez les colonnes',
+                allowClear: true,
+                width: '100%'
+            });
+        }
+
+        // Load filters when filters tab is clicked
+        $('#filters-tab').on('click', function() {
+            loadDynamicFilters();
         });
 
-        deselectAllBtn.addEventListener('click', function() {
-            Array.from(columnsSelect.options).forEach(option => {
-                option.selected = false;
-            });
-        });
-
-        // Compatibility with both Bootstrap 5 and 4
-        // For Bootstrap 4 modals
-        const closeBtn = document.querySelector('#reportModal .btn-close');
-        closeBtn.addEventListener('click', function() {
-            // Try Bootstrap 5 method first
-            const bsModal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
-            if (bsModal) {
-                bsModal.hide();
-            } else {
-                // Fallback to jQuery for Bootstrap 4
-                if (typeof $ !== 'undefined') {
-                    $('#reportModal').modal('hide');
-                }
+        // When modal is shown, initialize dynamic content
+        $('#reportModal').on('shown.bs.modal', function() {
+            // Initialize filters if filters tab is active
+            if ($('#filters-tab').hasClass('active')) {
+                loadDynamicFilters();
             }
         });
 
-        // Set cancel button to work with both Bootstrap versions
-        const cancelBtn = document.querySelector('#reportModal .btn-outline-secondary');
-        cancelBtn.addEventListener('click', function() {
-            // Try Bootstrap 5 method first
-            const bsModal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
-            if (bsModal) {
-                bsModal.hide();
-            } else {
-                // Fallback to jQuery for Bootstrap 4
-                if (typeof $ !== 'undefined') {
-                    $('#reportModal').modal('hide');
+        // Function to load dynamic filters via AJAX
+        function loadDynamicFilters() {
+            const filtersContainer = document.getElementById('dynamic-filters-container');
+            const modelName = document.querySelector('input[name="model"]').value;
+
+            if (!filtersContainer || !modelName) return;
+
+            // Show loading indicator
+            filtersContainer.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">Chargement des filtres...</p>
+            </div>
+        `;
+
+            // Fetch filters HTML
+            fetch(`/reports/model-filters?model=${modelName}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    filtersContainer.innerHTML = html;
+                    initializeFilterHandlers();
+                })
+                .catch(error => {
+                    filtersContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Erreur lors du chargement des filtres: ${error.message}
+                    </div>
+                `;
+                });
+        }
+
+        // Initialize handlers for dynamic filter controls
+        function initializeFilterHandlers() {
+            // Add filter button
+            const addFilterBtn = document.querySelector('.add-filter');
+            if (addFilterBtn) {
+                addFilterBtn.addEventListener('click', function() {
+                    const filtersContainer = document.getElementById('filters-list');
+                    const filterCount = filtersContainer.querySelectorAll('.filter-row').length;
+
+                    // Clone the filter template
+                    const template = document.querySelector('.filter-template');
+                    if (template) {
+                        const newFilter = template.cloneNode(true);
+                        newFilter.classList.remove('filter-template', 'd-none');
+
+                        // Update IDs and names
+                        updateFilterIndices(newFilter, filterCount);
+
+                        filtersContainer.appendChild(newFilter);
+                    }
+                });
+            }
+
+            // Remove filter button (delegated)
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-filter') || e.target.closest(
+                    '.remove-filter')) {
+                    const filterRow = e.target.closest('.filter-row');
+                    if (filterRow) {
+                        filterRow.remove();
+
+                        // Renumber remaining filters
+                        const filterRows = document.querySelectorAll('#filters-list .filter-row');
+                        filterRows.forEach((row, index) => {
+                            updateFilterIndices(row, index);
+                        });
+                    }
+                }
+            });
+
+            // Field change event (delegated)
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('filter-field')) {
+                    const fieldSelect = e.target;
+                    const rowIndex = fieldSelect.dataset.index;
+                    const operatorSelect = document.querySelector(
+                        `.filter-operator[data-index="${rowIndex}"]`);
+                    const selectedOption = fieldSelect.options[fieldSelect.selectedIndex];
+                    const fieldType = selectedOption.dataset.type;
+
+                    if (operatorSelect) {
+                        populateOperators(operatorSelect, fieldType);
+                    }
+                }
+            });
+
+            // Apply initial operators
+            document.querySelectorAll('.filter-field').forEach(function(field) {
+                const selectedOption = field.options[field.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const fieldType = selectedOption.dataset.type;
+                    const rowIndex = field.dataset.index;
+                    const operatorSelect = document.querySelector(
+                        `.filter-operator[data-index="${rowIndex}"]`);
+
+                    if (operatorSelect) {
+                        populateOperators(operatorSelect, fieldType);
+
+                        // Select previously selected operator if any
+                        const selectedOperator = operatorSelect.dataset.selected;
+                        if (selectedOperator) {
+                            for (let i = 0; i < operatorSelect.options.length; i++) {
+                                if (operatorSelect.options[i].value === selectedOperator) {
+                                    operatorSelect.options[i].selected = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Clear filters button
+            const clearFiltersBtn = document.querySelector('.clear-filters');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    const filtersContainer = document.getElementById('filters-list');
+                    const filterRows = filtersContainer.querySelectorAll('.filter-row');
+
+                    if (filterRows.length > 0) {
+                        // Keep only first row and reset it
+                        filterRows.forEach((row, index) => {
+                            if (index === 0) {
+                                // Reset first row values
+                                const fieldSelect = row.querySelector('.filter-field');
+                                if (fieldSelect) fieldSelect.selectedIndex = 0;
+
+                                const operatorSelect = row.querySelector('.filter-operator');
+                                if (operatorSelect) {
+                                    operatorSelect.innerHTML =
+                                        '<option value="">Sélectionner un opérateur</option>';
+                                }
+
+                                const valueInput = row.querySelector('.filter-value');
+                                if (valueInput) valueInput.value = '';
+                            } else {
+                                // Remove additional rows
+                                row.remove();
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // Helper function to update filter indices
+        function updateFilterIndices(filterElement, index) {
+            const fieldSelect = filterElement.querySelector('.filter-field');
+            const operatorSelect = filterElement.querySelector('.filter-operator');
+            const valueInput = filterElement.querySelector('.filter-value');
+
+            if (fieldSelect) {
+                fieldSelect.name = `filters[${index}][field]`;
+                fieldSelect.dataset.index = index;
+            }
+
+            if (operatorSelect) {
+                operatorSelect.name = `filters[${index}][operator]`;
+                operatorSelect.dataset.index = index;
+            }
+
+            if (valueInput) {
+                valueInput.name = `filters[${index}][value]`;
+                valueInput.dataset.index = index;
+            }
+        }
+
+        // Populate operators based on field type
+        function populateOperators(operatorSelect, fieldType) {
+            // Clear current options
+            operatorSelect.innerHTML = '<option value="">Sélectionner un opérateur</option>';
+
+            // Default operators
+            const operators = {
+                'string': {
+                    'equals': 'Égal à',
+                    'not_equals': 'Différent de',
+                    'contains': 'Contient',
+                    'starts_with': 'Commence par',
+                    'ends_with': 'Finit par',
+                    'is_null': 'Est vide',
+                    'is_not_null': 'N\'est pas vide'
+                },
+                'integer': {
+                    'equals': 'Égal à',
+                    'not_equals': 'Différent de',
+                    'greater_than': 'Supérieur à',
+                    'greater_than_or_equal': 'Supérieur ou égal à',
+                    'less_than': 'Inférieur à',
+                    'less_than_or_equal': 'Inférieur ou égal à',
+                    'is_null': 'Est vide',
+                    'is_not_null': 'N\'est pas vide'
+                },
+                'boolean': {
+                    'equals': 'Est vrai',
+                    'not_equals': 'Est faux'
+                },
+                'date': {
+                    'equals': 'Égal à',
+                    'not_equals': 'Différent de',
+                    'greater_than': 'Après',
+                    'less_than': 'Avant',
+                    'is_null': 'Est vide',
+                    'is_not_null': 'N\'est pas vide'
+                },
+                'datetime': {
+                    'equals': 'Égal à',
+                    'not_equals': 'Différent de',
+                    'greater_than': 'Après',
+                    'less_than': 'Avant',
+                    'is_null': 'Est vide',
+                    'is_not_null': 'N\'est pas vide'
+                }
+            };
+
+            // Get operators for this field type
+            const typeOperators = operators[fieldType] || {
+                'equals': 'Égal à',
+                'not_equals': 'Différent de'
+            };
+
+            // Add operators to select
+            Object.entries(typeOperators).forEach(([value, label]) => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = label;
+                operatorSelect.appendChild(option);
+            });
+        }
+
+        // Form submission handling
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            // Ensure at least one column is selected
+            const columnsSelect = document.getElementById('reportColumns');
+            if (columnsSelect && columnsSelect.selectedOptions.length === 0) {
+                e.preventDefault();
+                alert('Veuillez sélectionner au moins une colonne');
+
+                // Activate columns tab
+                document.getElementById('columns-tab').click();
+                return false;
+            }
+
+            // Pre-submit processing for filters
+            const filtersContainer = document.getElementById('filters-list');
+            if (filtersContainer) {
+                const filterRows = filtersContainer.querySelectorAll('.filter-row');
+                let hasValidFilter = false;
+
+                filterRows.forEach((row, index) => {
+                    const fieldSelect = row.querySelector('.filter-field');
+                    const operatorSelect = row.querySelector('.filter-operator');
+                    const valueInput = row.querySelector('.filter-value');
+
+                    if (fieldSelect && fieldSelect.value &&
+                        operatorSelect && operatorSelect.value) {
+                        hasValidFilter = true;
+
+                        // For null operators, we don't need a value
+                        if (['is_null', 'is_not_null'].includes(operatorSelect.value)) {
+                            if (valueInput) valueInput.value = '';
+                        }
+                    }
+                });
+
+                // If there are incomplete filters, we still submit but might want to warn the user
+                if (filterRows.length > 0 && !hasValidFilter) {
+                    const proceed = confirm(
+                        'Certains filtres sont incomplets et seront ignorés. Voulez-vous continuer ?'
+                        );
+                    if (!proceed) {
+                        e.preventDefault();
+                        // Activate filters tab
+                        document.getElementById('filters-tab').click();
+                        return false;
+                    }
                 }
             }
         });

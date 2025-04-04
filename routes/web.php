@@ -113,8 +113,9 @@ Route::middleware([
     })->name('profile');
 
     // Reports and export routes
-    Route::prefix('reports')->name('reports.')->group(function () {
+    Route::prefix('reports')->name('reports.')->middleware(['auth'])->group(function () {
         Route::get('/model-data', [ReportController::class, 'getModelData'])->name('model-data');
+        Route::get('/model-filters', [ReportController::class, 'getModelFilters'])->name('model-filters');
         Route::post('/generate', [ReportController::class, 'generate'])->name('generate');
     });
 
