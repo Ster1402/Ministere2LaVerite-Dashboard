@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Exceptions\ReportGenerationException;
 
 class ReportingService
 {
@@ -13,15 +15,22 @@ class ReportingService
      *
      * @param string $modelClass
      * @param array $columns
+     * @param array $filters
      * @param string $format
      * @param string $paperSize
      * @param string $orientation
      * @return mixed
      */
-    public function generateReport($modelClass, $columns, $format = 'pdf', $paperSize = 'a4', $orientation = 'portrait')
-    {
+    public function generateReport(
+        $modelClass,
+        $columns,
+        $filters = [],
+        $format = 'pdf',
+        $paperSize = 'a4',
+        $orientation = 'portrait'
+    ) {
         if (!$this->isReportable($modelClass)) {
-            throw new \InvalidArgumentException("The model {$modelClass} is not reportable");
+            throw new ReportGenerationException("The model {$modelClass} is not reportable");
         }
 
         // Get the report title
@@ -29,6 +38,11 @@ class ReportingService
 
         // Get the query builder from the model
         $queryBuilder = $modelClass::getReportQuery();
+
+        // Apply dynamic filters if model is filterable
+        if ($this->isFilterable($modelClass) && !empty($filters)) {
+            $queryBuilder = $modelClass::applyDynamicFilters($queryBuilder, $filters);
+        }
 
         // Apply ordering
         $orderColumn = $modelClass::getReportDefaultOrder();
@@ -101,6 +115,36 @@ class ReportingService
     }
 
     /**
+     * Get all filterable attributes for a model.
+     *
+     * @param string $modelClass
+     * @return array
+     */
+    public function getFilterableAttributes($modelClass)
+    {
+        if (!$this->isFilterable($modelClass)) {
+            return [];
+        }
+
+        return $modelClass::getFilterableAttributes();
+    }
+
+    /**
+     * Get filter operators for a model.
+     *
+     * @param string $modelClass
+     * @return array
+     */
+    public function getFilterOperators($modelClass)
+    {
+        if (!$this->isFilterable($modelClass)) {
+            return [];
+        }
+
+        return $modelClass::getFilterOperators();
+    }
+
+    /**
      * Check if a model class implements the ReportableModel interface.
      *
      * @param string $modelClass
@@ -110,6 +154,20 @@ class ReportingService
     {
         return in_array(
             \App\Interfaces\ReportableModel::class,
+            class_implements($modelClass) ?: []
+        );
+    }
+
+    /**
+     * Check if a model class implements the FilterableModel interface.
+     *
+     * @param string $modelClass
+     * @return bool
+     */
+    public function isFilterable($modelClass)
+    {
+        return in_array(
+            \App\Interfaces\FilterableModel::class,
             class_implements($modelClass) ?: []
         );
     }
