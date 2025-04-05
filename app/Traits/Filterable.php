@@ -393,6 +393,60 @@ trait Filterable
     }
 
     /**
+     * Apply filter to a relationship
+     *
+     * @param Builder $query
+     * @param string $relation
+     * @param string $column
+     * @param string $operatorKey
+     * @param mixed $value
+     * @param string $type
+     */
+    protected static function applyRelationFilter(
+        Builder $query,
+        string $relation,
+        string $column,
+        string $operatorKey,
+        $value = null,
+        string $type = 'string'
+    ) {
+        $operators = self::getFilterOperators();
+        $mappedType = self::getMappedType($type);
+
+        // Get operator details
+        if (!isset($operators[$mappedType][$operatorKey])) {
+            return;
+        }
+
+        $operatorDetails = $operators[$mappedType][$operatorKey];
+        $sqlOperator = $operatorDetails['operator'];
+
+        // Apply value modifier if exists
+        if (isset($operatorDetails['value_modifier']) && is_callable($operatorDetails['value_modifier'])) {
+            $value = $operatorDetails['value_modifier']($value);
+        }
+
+        // If operator provides a value, use that instead
+        if (array_key_exists('value', $operatorDetails)) {
+            $value = $operatorDetails['value'];
+        }
+
+        // Handle different filtering scenarios
+        if (isset($operatorDetails['value']) && $operatorDetails['value'] === null) {
+            // Null checks
+            $query->whereHas($relation, function ($q) use ($column, $sqlOperator) {
+                $method = $sqlOperator === 'IS' ? 'whereNull' : 'whereNotNull';
+                $q->$method($column);
+            });
+        } elseif (in_array($sqlOperator, ['LIKE', '=', '!=', '>', '<', '>=', '<='])) {
+            // Standard comparison operators
+            $query->whereHas($relation, function ($q) use ($column, $sqlOperator, $value) {
+                $q->where($column, $sqlOperator, $value);
+            });
+        }
+    }
+
+    /**
      * Map a database or cast type to our operator types.
      *
      * @param string $type

@@ -13,37 +13,6 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
 use App\Traits\Filterable;
 
-/**
- *
- *
- * @property int $id
- * @property string $name
- * @property string|null $description
- * @property int $sector_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Event> $events
- * @property-read int|null $events_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Media> $medias
- * @property-read int|null $medias_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messages
- * @property-read int|null $messages_count
- * @property-read \App\Models\Sector $sector
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
- * @property-read int|null $users_count
- * @method static \Database\Factories\AssemblyFactory factory($count = null, $state = [])
- * @method static Builder|Assembly filter(array $filters)
- * @method static Builder|Assembly newModelQuery()
- * @method static Builder|Assembly newQuery()
- * @method static Builder|Assembly query()
- * @method static Builder|Assembly whereCreatedAt($value)
- * @method static Builder|Assembly whereDescription($value)
- * @method static Builder|Assembly whereId($value)
- * @method static Builder|Assembly whereName($value)
- * @method static Builder|Assembly whereSectorId($value)
- * @method static Builder|Assembly whereUpdatedAt($value)
- * @mixin \Eloquent
- */
 class Assembly extends Model implements ReportableModel, FilterableModel
 {
     use HasFactory;
@@ -94,10 +63,59 @@ class Assembly extends Model implements ReportableModel, FilterableModel
     }
 
     /**
-     * Get reportable columns for this model.
-     *
-     * @return array
+     * Get custom filterable attributes for this model
      */
+    public static function getCustomFilterableAttributes(): array
+    {
+        return [
+            'sector_name' => [
+                'name' => 'sector_name',
+                'display_name' => 'Nom du secteur',
+                'type' => 'string',
+                'relation' => 'sector',
+                'relation_column' => 'name',
+                'operators' => ['equals', 'not_equals', 'contains'],
+            ],
+            'users_count' => [
+                'name' => 'users_count',
+                'display_name' => 'Nombre de membres',
+                'type' => 'integer',
+                'relation' => 'users',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'events_count' => [
+                'name' => 'events_count',
+                'display_name' => 'Nombre d\'événements',
+                'type' => 'integer',
+                'relation' => 'events',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'messages_count' => [
+                'name' => 'messages_count',
+                'display_name' => 'Nombre de messages',
+                'type' => 'integer',
+                'relation' => 'messages',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'medias_count' => [
+                'name' => 'medias_count',
+                'display_name' => 'Nombre de médias',
+                'type' => 'integer',
+                'relation' => 'medias',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+        ];
+    }
+
+    // Rest of the model remains the same as in the original implementation
     public static function getReportableColumns()
     {
         return [
@@ -162,8 +180,6 @@ class Assembly extends Model implements ReportableModel, FilterableModel
 
     /**
      * Get the report title.
-     *
-     * @return string
      */
     public static function getReportTitle()
     {
@@ -172,8 +188,6 @@ class Assembly extends Model implements ReportableModel, FilterableModel
 
     /**
      * Get the default ordering for reports.
-     *
-     * @return string
      */
     public static function getReportDefaultOrder()
     {
@@ -182,193 +196,10 @@ class Assembly extends Model implements ReportableModel, FilterableModel
 
     /**
      * Get the report query with eager loaded relationships.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function getReportQuery()
     {
         return self::with(['sector'])
             ->withCount(['users', 'events', 'messages', 'medias']);
-    }
-
-    /**
-     * Get the filterable attributes for this model.
-     *
-     * @return array
-     */
-    public static function getFilterableAttributes(): array
-    {
-        return [
-            'id' => [
-                'name' => 'id',
-                'display_name' => 'ID',
-                'type' => 'integer',
-                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than'],
-            ],
-            'name' => [
-                'name' => 'name',
-                'display_name' => 'Nom de l\'assemblée',
-                'type' => 'string',
-                'operators' => ['equals', 'not_equals', 'contains', 'starts_with', 'ends_with'],
-            ],
-            'description' => [
-                'name' => 'description',
-                'display_name' => 'Description',
-                'type' => 'string',
-                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
-            ],
-            'sector_id' => [
-                'name' => 'sector_id',
-                'display_name' => 'Secteur ID',
-                'type' => 'integer',
-                'operators' => ['equals', 'not_equals'],
-            ],
-            'sector_name' => [
-                'name' => 'sector_name',
-                'display_name' => 'Nom du secteur',
-                'type' => 'string',
-                'operators' => ['equals', 'not_equals', 'contains'],
-                'custom_query' => true,
-            ],
-            'users_count' => [
-                'name' => 'users_count',
-                'display_name' => 'Nombre de membres',
-                'type' => 'integer',
-                'operators' => ['greater_than', 'less_than', 'equals'],
-                'custom_query' => true,
-            ],
-            'events_count' => [
-                'name' => 'events_count',
-                'display_name' => 'Nombre d\'événements',
-                'type' => 'integer',
-                'operators' => ['greater_than', 'less_than', 'equals'],
-                'custom_query' => true,
-            ],
-            'created_at' => [
-                'name' => 'created_at',
-                'display_name' => 'Date de création',
-                'type' => 'datetime',
-                'operators' => ['greater_than', 'less_than'],
-            ],
-            'updated_at' => [
-                'name' => 'updated_at',
-                'display_name' => 'Dernière mise à jour',
-                'type' => 'datetime',
-                'operators' => ['greater_than', 'less_than'],
-            ],
-        ];
-    }
-
-    /**
-     * Apply dynamic filters specific to this model.
-     *
-     * @param Builder $query
-     * @param array $filters
-     * @return Builder
-     */
-    public static function applyDynamicFilters(Builder $query, array $filters)
-    {
-        foreach ($filters as $filter) {
-            if (!isset($filter['field'], $filter['operator'], $filter['value'])) {
-                continue;
-            }
-
-            // Handle custom fields
-            if ($filter['field'] === 'sector_name') {
-                $query = self::applySectorNameFilter($query, $filter['operator'], $filter['value']);
-                continue;
-            }
-
-            if ($filter['field'] === 'users_count') {
-                $query = self::applyUsersCountFilter($query, $filter['operator'], $filter['value']);
-                continue;
-            }
-
-            if ($filter['field'] === 'events_count') {
-                $query = self::applyEventsCountFilter($query, $filter['operator'], $filter['value']);
-                continue;
-            }
-        }
-
-        // Apply standard filters from the Filterable trait
-        return parent::applyDynamicFilters($query, $filters);
-    }
-
-    /**
-     * Apply filter for sector name.
-     *
-     * @param Builder $query
-     * @param string $operator
-     * @param string $value
-     * @return Builder
-     */
-    private static function applySectorNameFilter(Builder $query, string $operator, string $value): Builder
-    {
-        switch ($operator) {
-            case 'equals':
-                return $query->whereHas('sector', function ($q) use ($value) {
-                    $q->where('name', $value);
-                });
-            case 'not_equals':
-                return $query->whereHas('sector', function ($q) use ($value) {
-                    $q->where('name', '!=', $value);
-                });
-            case 'contains':
-                return $query->whereHas('sector', function ($q) use ($value) {
-                    $q->where('name', 'like', '%' . $value . '%');
-                });
-            default:
-                return $query;
-        }
-    }
-
-    /**
-     * Apply filter for users count.
-     *
-     * @param Builder $query
-     * @param string $operator
-     * @param int $value
-     * @return Builder
-     */
-    private static function applyUsersCountFilter(Builder $query, string $operator, $value): Builder
-    {
-        $value = intval($value);
-
-        // Use withCount to efficiently filter by the count
-        switch ($operator) {
-            case 'equals':
-                return $query->withCount('users')->having('users_count', '=', $value);
-            case 'greater_than':
-                return $query->withCount('users')->having('users_count', '>', $value);
-            case 'less_than':
-                return $query->withCount('users')->having('users_count', '<', $value);
-            default:
-                return $query;
-        }
-    }
-
-    /**
-     * Apply filter for events count.
-     *
-     * @param Builder $query
-     * @param string $operator
-     * @param int $value
-     * @return Builder
-     */
-    private static function applyEventsCountFilter(Builder $query, string $operator, $value): Builder
-    {
-        $value = intval($value);
-
-        // Use withCount to efficiently filter by the count
-        switch ($operator) {
-            case 'equals':
-                return $query->withCount('events')->having('events_count', '=', $value);
-            case 'greater_than':
-                return $query->withCount('events')->having('events_count', '>', $value);
-            case 'less_than':
-                return $query->withCount('events')->having('events_count', '<', $value);
-            default:
-                return $query;
-        }
     }
 }
