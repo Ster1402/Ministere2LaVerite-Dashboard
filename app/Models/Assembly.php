@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,42 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
+use App\Traits\Filterable;
 
-/**
- * 
- *
- * @property int $id
- * @property string $name
- * @property string|null $description
- * @property int $sector_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Event> $events
- * @property-read int|null $events_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Media> $medias
- * @property-read int|null $medias_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messages
- * @property-read int|null $messages_count
- * @property-read \App\Models\Sector $sector
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
- * @property-read int|null $users_count
- * @method static \Database\Factories\AssemblyFactory factory($count = null, $state = [])
- * @method static Builder|Assembly filter(array $filters)
- * @method static Builder|Assembly newModelQuery()
- * @method static Builder|Assembly newQuery()
- * @method static Builder|Assembly query()
- * @method static Builder|Assembly whereCreatedAt($value)
- * @method static Builder|Assembly whereDescription($value)
- * @method static Builder|Assembly whereId($value)
- * @method static Builder|Assembly whereName($value)
- * @method static Builder|Assembly whereSectorId($value)
- * @method static Builder|Assembly whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-class Assembly extends Model implements ReportableModel
+class Assembly extends Model implements ReportableModel, FilterableModel
 {
     use HasFactory;
     use Reportable;
+    use Filterable;
 
     protected $guarded = ['id'];
     protected $with = ['sector'];
@@ -91,10 +63,59 @@ class Assembly extends Model implements ReportableModel
     }
 
     /**
-     * Get reportable columns for this model.
-     *
-     * @return array
+     * Get custom filterable attributes for this model
      */
+    public static function getCustomFilterableAttributes(): array
+    {
+        return [
+            'sector_name' => [
+                'name' => 'sector_name',
+                'display_name' => 'Nom du secteur',
+                'type' => 'string',
+                'relation' => 'sector',
+                'relation_column' => 'name',
+                'operators' => ['equals', 'not_equals', 'contains'],
+            ],
+            'users_count' => [
+                'name' => 'users_count',
+                'display_name' => 'Nombre de membres',
+                'type' => 'integer',
+                'relation' => 'users',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'events_count' => [
+                'name' => 'events_count',
+                'display_name' => 'Nombre d\'événements',
+                'type' => 'integer',
+                'relation' => 'events',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'messages_count' => [
+                'name' => 'messages_count',
+                'display_name' => 'Nombre de messages',
+                'type' => 'integer',
+                'relation' => 'messages',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'medias_count' => [
+                'name' => 'medias_count',
+                'display_name' => 'Nombre de médias',
+                'type' => 'integer',
+                'relation' => 'medias',
+                'relation_column' => 'id',
+                'count' => true,
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+        ];
+    }
+
+    // Rest of the model remains the same as in the original implementation
     public static function getReportableColumns()
     {
         return [
@@ -159,8 +180,6 @@ class Assembly extends Model implements ReportableModel
 
     /**
      * Get the report title.
-     *
-     * @return string
      */
     public static function getReportTitle()
     {
@@ -169,8 +188,6 @@ class Assembly extends Model implements ReportableModel
 
     /**
      * Get the default ordering for reports.
-     *
-     * @return string
      */
     public static function getReportDefaultOrder()
     {
@@ -179,8 +196,6 @@ class Assembly extends Model implements ReportableModel
 
     /**
      * Get the report query with eager loaded relationships.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function getReportQuery()
     {

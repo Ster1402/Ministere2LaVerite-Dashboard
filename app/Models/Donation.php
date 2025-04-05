@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,10 +48,11 @@ use App\Traits\Reportable;
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereUserId($value)
  * @mixin \Eloquent
  */
-class Donation extends Model implements ReportableModel
+class Donation extends Model implements ReportableModel, FilterableModel
 {
     use HasFactory;
     use Reportable;
+    use Filterable;
 
     protected $fillable = [
         'transaction_id',
@@ -202,5 +205,166 @@ class Donation extends Model implements ReportableModel
     public static function getReportDefaultOrder()
     {
         return 'donation_date';
+    }
+
+    /**
+     * Get the filterable attributes for this model.
+     *
+     * @return array
+     */
+    public static function getFilterableAttributes(): array
+    {
+        return [
+            'id' => [
+                'name' => 'id',
+                'display_name' => 'ID',
+                'type' => 'integer',
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than'],
+            ],
+            'reference' => [
+                'name' => 'reference',
+                'display_name' => 'Référence',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'amount' => [
+                'name' => 'amount',
+                'display_name' => 'Montant',
+                'type' => 'integer', // Using integer type for easier numeric comparison
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'donor_name' => [
+                'name' => 'donor_name',
+                'display_name' => 'Nom du donateur',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'starts_with', 'is_null', 'is_not_null'],
+            ],
+            'donor_email' => [
+                'name' => 'donor_email',
+                'display_name' => 'Email du donateur',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'donor_phone' => [
+                'name' => 'donor_phone',
+                'display_name' => 'Téléphone du donateur',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'donation_date' => [
+                'name' => 'donation_date',
+                'display_name' => 'Date de don',
+                'type' => 'date',
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than'],
+            ],
+            'message' => [
+                'name' => 'message',
+                'display_name' => 'Message',
+                'type' => 'string',
+                'operators' => ['contains', 'is_null', 'is_not_null'],
+            ],
+            'is_anonymous' => [
+                'name' => 'is_anonymous',
+                'display_name' => 'Don anonyme',
+                'type' => 'boolean',
+                'operators' => ['equals', 'not_equals'],
+            ],
+            'user_id' => [
+                'name' => 'user_id',
+                'display_name' => 'ID Utilisateur',
+                'type' => 'integer',
+                'operators' => ['equals', 'not_equals', 'is_null', 'is_not_null'],
+            ],
+            'payment_method_id' => [
+                'name' => 'payment_method_id',
+                'display_name' => 'Méthode de paiement ID',
+                'type' => 'integer',
+                'operators' => ['equals', 'not_equals'],
+            ],
+            'payment_method_name' => [
+                'name' => 'payment_method_name',
+                'display_name' => 'Méthode de paiement',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains'],
+                'custom_query' => true,
+            ],
+            'status' => [
+                'name' => 'status',
+                'display_name' => 'Statut',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals'],
+            ],
+            'created_at' => [
+                'name' => 'created_at',
+                'display_name' => 'Date de création',
+                'type' => 'datetime',
+                'operators' => ['greater_than', 'less_than'],
+            ],
+            'updated_at' => [
+                'name' => 'updated_at',
+                'display_name' => 'Date de mise à jour',
+                'type' => 'datetime',
+                'operators' => ['greater_than', 'less_than'],
+            ],
+        ];
+    }
+
+    /**
+     * Apply dynamic filters specific to this model.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $filters
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function applyDynamicFilters($query, array $filters)
+    {
+        foreach ($filters as $filter) {
+            if (
+                !isset($filter['field'], $filter['operator'], $filter['value']) &&
+                !in_array($filter['operator'], ['is_null', 'is_not_null'])
+            ) {
+                continue;
+            }
+
+            // Handle payment_method_name custom filter
+            if ($filter['field'] === 'payment_method_name') {
+                $query = self::applyPaymentMethodNameFilter($query, $filter['operator'], $filter['value']);
+                continue;
+            }
+        }
+
+        // Apply standard filters from the Filterable trait
+        return parent::applyDynamicFilters($query, $filters);
+    }
+
+    /**
+     * Apply filter for payment method name.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $operator
+     * @param string $value
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private static function applyPaymentMethodNameFilter($query, string $operator, string $value)
+    {
+        switch ($operator) {
+            case 'equals':
+                return $query->whereHas('paymentMethod', function ($q) use ($value) {
+                    $q->where('name', $value)
+                        ->orWhere('display_name', $value);
+                });
+            case 'not_equals':
+                return $query->whereDoesntHave('paymentMethod', function ($q) use ($value) {
+                    $q->where('name', $value)
+                        ->orWhere('display_name', $value);
+                });
+            case 'contains':
+                return $query->whereHas('paymentMethod', function ($q) use ($value) {
+                    $q->where('name', 'like', '%' . $value . '%')
+                        ->orWhere('display_name', 'like', '%' . $value . '%');
+                });
+            default:
+                return $query;
+        }
     }
 }

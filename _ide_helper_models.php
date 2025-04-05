@@ -42,6 +42,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Admin newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Admin query()
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin applyFilters(array $filters)
  */
 	class Admin extends \Eloquent {}
 }
@@ -65,20 +66,20 @@ namespace App\Models{
  * @property-read \App\Models\Sector $sector
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly applyFilters(array $filters)
  * @method static \Database\Factories\AssemblyFactory factory($count = null, $state = [])
- * @method static Builder|Assembly filter(array $filters)
- * @method static Builder|Assembly newModelQuery()
- * @method static Builder|Assembly newQuery()
- * @method static Builder|Assembly query()
- * @method static Builder|Assembly whereCreatedAt($value)
- * @method static Builder|Assembly whereDescription($value)
- * @method static Builder|Assembly whereId($value)
- * @method static Builder|Assembly whereName($value)
- * @method static Builder|Assembly whereSectorId($value)
- * @method static Builder|Assembly whereUpdatedAt($value)
- * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly filter(array $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly whereSectorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Assembly whereUpdatedAt($value)
  */
-	class Assembly extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class Assembly extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 
 namespace App\Models{
@@ -265,13 +266,14 @@ namespace App\Models{
  * @property int $is_pending
  * @property int $is_completed
  * @property int $is_failed
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation applyFilters(array $filters)
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereIsCompleted($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereIsFailed($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereIsPending($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Donation wherePaymentData($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereReference($value)
  */
-	class Donation extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class Donation extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 
 namespace App\Models{
@@ -331,8 +333,9 @@ namespace App\Models{
  * @method static Builder|Group whereName($value)
  * @method static Builder|Group whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|Group applyFilters(array $filters)
  */
-	class Group extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class Group extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 
 namespace App\Models{
@@ -587,23 +590,25 @@ namespace App\Models{
  * @property int|null $master_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
+ * @property-read int|null $assemblies_count
  * @property-read Sector|null $master
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Sector> $subsectors
  * @property-read int|null $subsectors_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector applyFilters(array $filters)
  * @method static \Database\Factories\SectorFactory factory($count = null, $state = [])
- * @method static Builder|Sector filter(array $filters)
- * @method static Builder|Sector newModelQuery()
- * @method static Builder|Sector newQuery()
- * @method static Builder|Sector query()
- * @method static Builder|Sector whereCreatedAt($value)
- * @method static Builder|Sector whereDescription($value)
- * @method static Builder|Sector whereId($value)
- * @method static Builder|Sector whereMasterId($value)
- * @method static Builder|Sector whereName($value)
- * @method static Builder|Sector whereUpdatedAt($value)
- * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector filter(array $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector whereMasterId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector whereUpdatedAt($value)
  */
-	class Sector extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class Sector extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 
 namespace App\Models{
@@ -618,6 +623,9 @@ namespace App\Models{
  * @method static Builder|Subsector newQuery()
  * @method static Builder|Subsector query()
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
+ * @property-read int|null $assemblies_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Subsector applyFilters(array $filters)
  */
 	class Subsector extends \Eloquent {}
 }
@@ -758,7 +766,8 @@ namespace App\Models{
  * @property string|null $profession_details
  * @method static Builder|User whereProfessionDetails($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|User applyFilters(array $filters)
  */
-	class User extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class User extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 
