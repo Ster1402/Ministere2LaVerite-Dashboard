@@ -292,23 +292,23 @@ namespace App\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
  * @property-read int|null $assemblies_count
  * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Event applyFilters(array $filters)
  * @method static \Database\Factories\EventFactory factory($count = null, $state = [])
- * @method static Builder|Event filter(array $filters)
- * @method static Builder|Event newModelQuery()
- * @method static Builder|Event newQuery()
- * @method static Builder|Event query()
- * @method static Builder|Event whereCreatedAt($value)
- * @method static Builder|Event whereDescription($value)
- * @method static Builder|Event whereFrom($value)
- * @method static Builder|Event whereId($value)
- * @method static Builder|Event whereStatus($value)
- * @method static Builder|Event whereTitle($value)
- * @method static Builder|Event whereTo($value)
- * @method static Builder|Event whereUpdatedAt($value)
- * @method static Builder|Event whereUserId($value)
- * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|Event filter(array $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Event newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Event query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereFrom($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereTo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Event whereUserId($value)
  */
-	class Event extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class Event extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 
 namespace App\Models{
