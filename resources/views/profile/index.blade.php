@@ -5,7 +5,7 @@
     </x-slot>
 
     <x-slot name="subtitle">
-        {{ Auth::user()->name }}
+        {{ Auth::user()?->name }}
     </x-slot>
 
 

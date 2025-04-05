@@ -27,7 +27,7 @@ class MessageController extends Controller
         $messagesReceived = Message::orderBy('updated_at', 'desc')
             ->where('receiverId', auth()->id())
             ->where('senderId', '!=', auth()->id())
-            ->orWhereHas('assemblies', fn ($q) => $q->where('assemblies.id', \Auth::user()->assembly_id))
+            ->orWhereHas('assemblies', fn($q) => $q->where('assemblies.id', \Auth::user()?->assembly_id))
             ->filter(request(['search', 'category', 'assembly', 'author']))
             ->paginate(15, ['*'], 'msg-received')
             ->withQueryString();
@@ -58,8 +58,7 @@ class MessageController extends Controller
     public function store(
         StoreMessageRequest $request,
         StoreMessageAction  $action
-    ): Application|Redirector|RedirectResponse|\Illuminate\Contracts\Foundation\Application
-    {
+    ): Application|Redirector|RedirectResponse|\Illuminate\Contracts\Foundation\Application {
         $action->execute($request->toDTO());
 
         return redirect()->route('messages.index');
@@ -90,9 +89,8 @@ class MessageController extends Controller
         UpdateMessageRequest $request,
         Message $message,
         UpdateMessageAction $updateMessageAction
-    )
-    {
-        $updateMessageAction->execute( $request->toDTO(), $message );
+    ) {
+        $updateMessageAction->execute($request->toDTO(), $message);
         return redirect()->route('messages.index');
     }
 
@@ -102,8 +100,8 @@ class MessageController extends Controller
      */
     public function destroy(
         DeleteMessageRequest $request,
-        Message              $message): Application|Redirector|RedirectResponse|\Illuminate\Contracts\Foundation\Application
-    {
+        Message              $message
+    ): Application|Redirector|RedirectResponse|\Illuminate\Contracts\Foundation\Application {
         $message->deleteOrFail();
 
         return redirect(route('messages.index'));

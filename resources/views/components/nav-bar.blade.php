@@ -4,8 +4,7 @@
     </div>
     <ul class="navbar-nav navbar-right">
         <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown"
-                                                     class="nav-link nav-link-lg message-toggle beep"><i
-                    class="far fa-envelope"></i></a>
+                class="nav-link nav-link-lg message-toggle beep"><i class="far fa-envelope"></i></a>
             <div class="dropdown-menu dropdown-list dropdown-menu-right">
                 <div class="dropdown-header">Messages
                     <div class="float-right">
@@ -14,7 +13,7 @@
                 </div>
                 <div class="dropdown-list-content dropdown-list-message">
                     @foreach ($messages as $message)
-                        <x-message-card :message="$message"/>
+                        <x-message-card :message="$message" />
                     @endforeach
                 </div>
                 <div class="dropdown-footer text-center">
@@ -24,9 +23,9 @@
         </li>
 
         <li class="dropdown"><a href="#" data-toggle="dropdown"
-                                class="nav-link dropdown-toggle nav-link-lg nav-link-user">
-                <img alt="image" src="{{ Auth::user()->profile_photo_url }}" class="rounded-circle mr-1">
-                <div class="d-sm-none d-lg-inline-block">{{ Auth::user()->name }}</div>
+                class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                <img alt="image" src="{{ Auth::user()?->profile_photo_url }}" class="rounded-circle mr-1">
+                <div class="d-sm-none d-lg-inline-block">{{ Auth::user()?->name }}</div>
             </a>
             <div class="dropdown-menu dropdown-menu-right">
                 <style>
@@ -46,10 +45,10 @@
                 </a>
                 <div class="dropdown-divider"></div>
                 <form method="POST" action="{{ route('logout') }}"
-                      class="dropdown-item has-icon text-danger hide-sidebar-mini">
+                    class="dropdown-item has-icon text-danger hide-sidebar-mini">
                     @csrf
                     <button type="submit"
-                            class="w-full mx-0 px-0 text-danger btn bg-transparent btn-outline- btn-lg btn-block btn-icon-split">
+                        class="w-full mx-0 px-0 text-danger btn bg-transparent btn-outline- btn-lg btn-block btn-icon-split">
                         <i class="fas fa-sign-out-alt w-icon"></i> Déconnexion
                     </button>
                 </form>

@@ -147,8 +147,96 @@ Route::middleware([
 });
 
 // Administrative routes (should be protected by admin middleware in a real app)
+// Administrative routes - combine existing routes and add comprehensive update functionality
 Route::middleware(['auth:sanctum'])->prefix('admin')->name('admin.')->group(function () {
-    // System maintenance route - should be restricted to super admins
+    // System update route - enhanced with comprehensive deployment steps
+    Route::get('/deploy-update-project', function () {
+        try {
+            // Start timing for performance monitoring
+            $startTime = microtime(true);
+            $log = [];
+
+            // 1. Clear application caches
+            $log[] = 'Clearing caches...';
+            Artisan::call('cache:clear');
+            Artisan::call('config:clear');
+            Artisan::call('view:clear');
+            Artisan::call('route:clear');
+            $log[] = '✓ Caches cleared successfully';
+
+            // 2. Run migrations with force flag to skip confirmations
+            $log[] = 'Running database migrations...';
+            $migrationOutput = Artisan::call('migrate --force');
+            $log[] = '✓ Migrations completed: ' . $migrationOutput;
+
+            // 3. Run necessary seeders
+            $log[] = 'Seeding database with required data...';
+            Artisan::call('db:seed --class=RolesSeeder');
+            Artisan::call('db:seed --class=PaymentMethodSeeder');
+            $log[] = '✓ Seeders completed';
+
+            // 4. Set up storage symlink if needed
+            $log[] = 'Setting up storage links...';
+            Artisan::call('storage:link');
+            $log[] = '✓ Storage links created';
+
+            // 5. Register scheduled commands for donation processing
+            $log[] = 'Setting up scheduled jobs...';
+            Artisan::call('schedule:run');
+            $log[] = '✓ Scheduled jobs registered';
+
+            // 6. Optimize the application
+            $log[] = 'Optimizing application...';
+            Artisan::call('optimize');
+            $log[] = '✓ Application optimized';
+
+            // Calculate execution time
+            $executionTime = round(microtime(true) - $startTime, 2);
+            $log[] = "Deployment completed in {$executionTime} seconds";
+
+            // Log the successful deployment
+            if (class_exists('App\Services\LoggingService')) {
+                \App\Services\LoggingService::info(
+                    'System deployment completed successfully',
+                    [
+                        'execution_time' => $executionTime,
+                        'steps' => $log,
+                        'user_id' => auth()->id()
+                    ],
+                    'system'
+                );
+            }
+
+            // Return success with deployment log
+            return view('admins.deployment', [
+                'success' => true,
+                'log' => $log,
+                'executionTime' => $executionTime
+            ]);
+        } catch (\Exception $e) {
+            // Log the error
+            if (class_exists('App\Services\LoggingService')) {
+                \App\Services\LoggingService::error(
+                    'System deployment failed',
+                    [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                        'user_id' => auth()->id()
+                    ],
+                    'system'
+                );
+            }
+
+            // Return error response
+            return view('admins.deployment', [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    })->name('deploy-update');
+
+    // Keep the existing routes
     Route::get('/dangerous-update-force', function () {
         Artisan::call('migrate --force');
         Artisan::call('db:seed');

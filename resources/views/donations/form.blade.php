@@ -115,7 +115,7 @@
                                                         <input id="donor_name" type="text"
                                                             class="form-control @error('donor_name') is-invalid @enderror"
                                                             name="donor_name"
-                                                            value="{{ old('donor_name', Auth::user()->name ?? '') }}">
+                                                            value="{{ old('donor_name', Auth::user()?->name ?? '') }}">
                                                         @error('donor_name')
                                                             <div class="invalid-feedback">
                                                                 {{ $message }}
@@ -133,7 +133,7 @@
                                                         <input id="donor_email" type="email"
                                                             class="form-control @error('donor_email') is-invalid @enderror"
                                                             name="donor_email"
-                                                            value="{{ old('donor_email', Auth::user()->email ?? '') }}">
+                                                            value="{{ old('donor_email', Auth::user()?->email ?? '') }}">
                                                         @error('donor_email')
                                                             <div class="invalid-feedback">
                                                                 {{ $message }}
@@ -152,7 +152,7 @@
                                                 <input id="donor_phone" type="text"
                                                     class="form-control @error('donor_phone') is-invalid @enderror"
                                                     name="donor_phone"
-                                                    value="{{ old('donor_phone', Auth::user()->phoneNumber ?? '') }}"
+                                                    value="{{ old('donor_phone', Auth::user()?->phoneNumber ?? '') }}"
                                                     required>
                                                 @error('donor_phone')
                                                     <div class="invalid-feedback">

@@ -22,7 +22,7 @@ class NavBar extends Component
      */
     public function render(): View|Closure|string
     {
-        $messages = Auth::user()->messagesReceived;
+        $messages = Auth::user()?->messagesReceived;
         return view('components.nav-bar', compact('messages'));
     }
 }

@@ -10,11 +10,11 @@
 
     <div class="user-profile">
         <div class="user-avatar">
-            <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}">
+            <img src="{{ Auth::user()?->profile_photo_url }}" alt="{{ Auth::user()?->name }}">
         </div>
         <div class="user-info">
-            <h4>{{ Auth::user()->name }}</h4>
-            <p>{{ Auth::user()->roles->pluck('displayName')->implode(', ') }}</p>
+            <h4>{{ Auth::user()?->name }}</h4>
+            <p>{{ Auth::user()?->roles->pluck('displayName')->implode(', ') }}</p>
         </div>
     </div>
 

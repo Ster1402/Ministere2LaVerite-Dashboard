@@ -13,7 +13,19 @@
                             <i class="far fa-calendar-alt"></i> {{ now()->format('d F Y') }}
                         </div>
                     </div>
+
                 </div>
+                <!-- Admin Tools Section -->
+                @if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())
+                    <div class="mt-4 flex text-lg-end">
+                        <a href="{{ route('admin.deploy-update') }}" class="date-display">
+                            Deploy System Updates
+                        </a>
+                        <a href="{{ route('admin.storage-link') }}" class="date-display">
+                            Recreate Storage Links
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -27,10 +39,10 @@
                             <!-- Key Metrics Cards -->
                             <div class="metrics-grid">
                                 <!-- Users Stats -->
-                                <x-stats-users-panel class="users-card"/>
+                                <x-stats-users-panel class="users-card" />
 
                                 <!-- Resources Stats -->
-                                <x-stats-resources-panel class="resources-card"/>
+                                <x-stats-resources-panel class="resources-card" />
 
                                 <!-- Events Stats -->
                                 <x-stats-events-panel class="events-card" />
