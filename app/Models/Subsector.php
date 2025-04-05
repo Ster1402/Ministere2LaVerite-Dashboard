@@ -9,6 +9,7 @@ use App\Traits\Reportable;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
+ * 
  *
  * @property-read \App\Models\Sector|null $master
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Sector> $subsectors
@@ -17,6 +18,9 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static Builder|Subsector newModelQuery()
  * @method static Builder|Subsector newQuery()
  * @method static Builder|Subsector query()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
+ * @property-read int|null $assemblies_count
+ * @method static Builder|Subsector applyFilters(array $filters)
  * @mixin \Eloquent
  */
 class Subsector extends Sector implements ReportableModel, FilterableModel

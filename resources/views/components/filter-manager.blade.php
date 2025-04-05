@@ -202,6 +202,12 @@
                     },
                     'not_equals': {
                         display: 'Différent de'
+                    },
+                    'is_null': {
+                        display: 'Est vide'
+                    },
+                    'is_not_null': {
+                        display: 'N\'est pas vide'
                     }
                 };
 

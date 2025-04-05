@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use App\Interfaces\ReportableModel;
+use App\Interfaces\FilterableModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
-use Carbon\Carbon;
+use App\Traits\Filterable;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $title
@@ -26,6 +27,7 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
  * @property-read int|null $assemblies_count
  * @property-read \App\Models\User|null $user
+ * @method static Builder|Event applyFilters(array $filters)
  * @method static \Database\Factories\EventFactory factory($count = null, $state = [])
  * @method static Builder|Event filter(array $filters)
  * @method static Builder|Event newModelQuery()
@@ -42,10 +44,14 @@ use Carbon\Carbon;
  * @method static Builder|Event whereUserId($value)
  * @mixin \Eloquent
  */
-class Event extends Model implements ReportableModel
+class Event extends Model implements ReportableModel, FilterableModel
 {
     use HasFactory;
     use Reportable;
+    use Filterable;
+
+    protected $guarded = ['id'];
+    protected $with = ['user'];
 
     /**
      * The attributes that should be cast.
@@ -57,39 +63,73 @@ class Event extends Model implements ReportableModel
         'to' => 'datetime',
     ];
 
-    protected $with = ['assemblies', 'user'];
-
-    protected $guarded = ['id'];
-
-    // Existing relationships remain the same
+    /**
+     * Relationship with the event creator
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Relationship with assemblies
+     */
     public function assemblies(): BelongsToMany
     {
         return $this->belongsToMany(Assembly::class)->withTimestamps();
     }
 
-    // Existing filter scope remains the same
+    /**
+     * Scope for basic search filtering
+     */
     public function scopeFilter(Builder $query, array $filters)
     {
-        $query
-            ->when($filters["search"] ?? false, static function ($query, $search) {
+        $query->when($filters["search"] ?? false, static function ($query, $search) {
+            $query->where(static function ($query) use ($search) {
                 $query
-                    ->where(static function ($query) use ($search) {
-                        $query
-                            ->where("title", "like", '%' . $search . '%')
-                            ->orWhere("description", "like", '%' . $search . '%');
-                    });
+                    ->where("title", "like", '%' . $search . '%')
+                    ->orWhere("description", "like", '%' . $search . '%')
+                    ->orWhereHas('user', fn($q) => $q->where('name', 'like', '%' . $search . '%'));
             });
+        });
+    }
+
+
+    /**
+     * Get custom filterable attributes for this model
+     */
+    public static function getCustomFilterableAttributes(): array
+    {
+        return [
+            'creator_name' => [
+                'name' => 'creator_name',
+                'display_name' => 'Nom du créateur',
+                'type' => 'string',
+                'relation' => 'user',
+                'relation_column' => 'name',
+                'operators' => ['contains', 'equals', 'not_equals'],
+            ],
+            'assembly_id' => [
+                'name' => 'assembly_id',
+                'display_name' => 'ID de l\'assemblée',
+                'type' => 'integer',
+                'relation' => 'assemblies',
+                'relation_column' => 'id',
+                'operators' => ['equals', 'not_equals', 'is_null', 'is_not_null'],
+            ],
+            'assembly_name' => [
+                'name' => 'assembly_name',
+                'display_name' => 'Nom de l\'assemblée',
+                'type' => 'string',
+                'relation' => 'assemblies',
+                'relation_column' => 'name',
+                'operators' => ['contains', 'equals', 'not_equals'],
+            ],
+        ];
     }
 
     /**
      * Get reportable columns for this model.
-     *
-     * @return array
      */
     public static function getReportableColumns()
     {
@@ -99,22 +139,8 @@ class Event extends Model implements ReportableModel
                 'data' => 'id',
             ],
             'title' => [
-                'title' => 'Titre de l\'événement',
+                'title' => 'Titre',
                 'data' => 'title',
-            ],
-            'creator' => [
-                'title' => 'Créé par',
-                'data' => function ($event) {
-                    return $event->user
-                        ? $event->user->name . ' ' . ($event->user->surname ?? '')
-                        : 'Créateur inconnu';
-                },
-            ],
-            'description' => [
-                'title' => 'Description',
-                'data' => function ($event) {
-                    return $event->description ?? 'Aucune description';
-                },
             ],
             'status' => [
                 'title' => 'Statut',
@@ -123,14 +149,21 @@ class Event extends Model implements ReportableModel
                         'unavailable' => 'Non disponible',
                         'ongoing' => 'En cours',
                         'ended' => 'Terminé',
-                        default => ucfirst($event->status)
+                        default => $event->status
                     };
+                },
+            ],
+            'creator' => [
+                'title' => 'Créateur',
+                'data' => function ($event) {
+                    return $event->user
+                        ? $event->user->name . ' ' . ($event->user->surname ?? '')
+                        : 'Créateur inconnu';
                 },
             ],
             'date_range' => [
                 'title' => 'Période',
                 'data' => function ($event) {
-                    // Handling different date scenario
                     if (!$event->from && !$event->to) {
                         return 'Date non spécifiée';
                     }
@@ -151,23 +184,11 @@ class Event extends Model implements ReportableModel
                 },
             ],
             'assemblies' => [
-                'title' => 'Assemblées concernées',
+                'title' => 'Assemblées',
                 'data' => function ($event) {
                     return $event->assemblies->isNotEmpty()
                         ? $event->assemblies->pluck('name')->implode(', ')
                         : 'Aucune assemblée';
-                },
-            ],
-            'duration' => [
-                'title' => 'Durée',
-                'data' => function ($event) {
-                    if ($event->from && $event->to) {
-                        $duration = $event->from->diffInDays($event->to);
-                        return $duration > 0
-                            ? $duration . ' jour(s)'
-                            : 'Moins d\'une journée';
-                    }
-                    return 'Non calculable';
                 },
             ],
             'created_at' => [
@@ -176,13 +197,10 @@ class Event extends Model implements ReportableModel
                     return $event->created_at->format('d/m/Y H:i');
                 },
             ],
-            'days_until_event' => [
-                'title' => 'Jours avant l\'événement',
+            'updated_at' => [
+                'title' => 'Dernière mise à jour',
                 'data' => function ($event) {
-                    if ($event->from && $event->from->isFuture()) {
-                        return now()->diffInDays($event->from) . ' jour(s)';
-                    }
-                    return 'Événement passé ou sans date';
+                    return $event->updated_at->format('d/m/Y H:i');
                 },
             ],
         ];
@@ -190,8 +208,6 @@ class Event extends Model implements ReportableModel
 
     /**
      * Get the report title.
-     *
-     * @return string
      */
     public static function getReportTitle()
     {
@@ -200,8 +216,6 @@ class Event extends Model implements ReportableModel
 
     /**
      * Get the default ordering for reports.
-     *
-     * @return string
      */
     public static function getReportDefaultOrder()
     {
@@ -210,13 +224,10 @@ class Event extends Model implements ReportableModel
 
     /**
      * Get the report query with eager loaded relationships.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function getReportQuery()
     {
         return self::with(['user', 'assemblies'])
-            // Optional: Add any specific query constraints
             ->orderBy('from');
     }
 }

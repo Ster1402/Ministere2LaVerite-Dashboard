@@ -8,7 +8,7 @@ use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- *
+ * 
  *
  * @property-read \App\Models\Assembly|null $assembly
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Baptism> $baptisms
@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|Admin newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Admin newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Admin query()
+ * @method static Builder|Admin applyFilters(array $filters)
  * @mixin \Eloquent
  */
 class Admin extends User implements ReportableModel, FilterableModel
