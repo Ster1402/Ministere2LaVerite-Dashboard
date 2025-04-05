@@ -20,7 +20,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $name
@@ -111,6 +111,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static Builder|User whereProfession($value)
  * @property string|null $profession_details
  * @method static Builder|User whereProfessionDetails($value)
+ * @method static Builder|User applyFilters(array $filters)
  * @mixin \Eloquent
  */
 class User extends Authenticatable implements ReportableModel, FilterableModel

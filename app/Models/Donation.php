@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\Reportable;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string|null $reference
@@ -46,6 +46,17 @@ use App\Traits\Reportable;
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereTransactionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Donation whereUserId($value)
+ * @property int|null $transaction_id
+ * @property string|null $payment_data
+ * @property int $is_pending
+ * @property int $is_completed
+ * @property int $is_failed
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation applyFilters(array $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereIsCompleted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereIsFailed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereIsPending($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation wherePaymentData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donation whereReference($value)
  * @mixin \Eloquent
  */
 class Donation extends Model implements ReportableModel, FilterableModel

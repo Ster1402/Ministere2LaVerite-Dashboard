@@ -48,7 +48,7 @@ trait Filterable
             $result[$column] = [
                 'name' => $column,
                 'display_name' => $displayName,
-                'type' => $type,
+                'type' => self::getMappedType($type),
                 'operators' => self::getOperatorsForType($type),
             ];
         }
@@ -303,6 +303,7 @@ trait Filterable
         ];
 
         $mappedType = $typeMap[$type] ?? 'default';
+
         return $operators[$mappedType] ?? $operators['default'];
     }
 

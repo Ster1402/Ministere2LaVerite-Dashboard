@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Traits\Reportable;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $name
@@ -31,6 +31,7 @@ use App\Traits\Reportable;
  * @method static Builder|Group whereId($value)
  * @method static Builder|Group whereName($value)
  * @method static Builder|Group whereUpdatedAt($value)
+ * @method static Builder|Group applyFilters(array $filters)
  * @mixin \Eloquent
  */
 class Group extends Model implements ReportableModel, FilterableModel
