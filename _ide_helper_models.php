@@ -42,6 +42,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Admin newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Admin query()
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|Admin applyFilters(array $filters)
  */
 	class Admin extends \Eloquent {}
 }
@@ -602,8 +603,11 @@ namespace App\Models{
  * @method static Builder|Sector whereName($value)
  * @method static Builder|Sector whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
+ * @property-read int|null $assemblies_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector applyFilters(array $filters)
  */
-	class Sector extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class Sector extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 
 namespace App\Models{
@@ -618,6 +622,9 @@ namespace App\Models{
  * @method static Builder|Subsector newQuery()
  * @method static Builder|Subsector query()
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Assembly> $assemblies
+ * @property-read int|null $assemblies_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Sector applyFilters(array $filters)
  */
 	class Subsector extends \Eloquent {}
 }
@@ -758,7 +765,8 @@ namespace App\Models{
  * @property string|null $profession_details
  * @method static Builder|User whereProfessionDetails($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|User applyFilters(array $filters)
  */
-	class User extends \Eloquent implements \App\Interfaces\ReportableModel {}
+	class User extends \Eloquent implements \App\Interfaces\ReportableModel, \App\Interfaces\FilterableModel {}
 }
 

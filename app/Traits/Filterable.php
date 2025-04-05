@@ -22,8 +22,15 @@ trait Filterable
         $result = [];
 
         foreach ($columns as $column) {
-            // Skip common columns that shouldn't be filtered
-            if (in_array($column, ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])) {
+            // Skip columns that shouldn't be filtered
+            if (in_array($column, [
+                'password',
+                'remember_token',
+                'two_factor_secret',
+                'two_factor_recovery_codes',
+                'profile_photo_path',
+                'current_team_id'
+            ])) {
                 continue;
             }
 
@@ -46,6 +53,12 @@ trait Filterable
             ];
         }
 
+        // Add custom model-specific attributes if method exists
+        if (method_exists(static::class, 'getCustomFilterableAttributes')) {
+            $customAttributes = static::getCustomFilterableAttributes();
+            $result = array_merge($result, $customAttributes);
+        }
+
         return $result;
     }
 
@@ -59,187 +72,193 @@ trait Filterable
         return [
             'string' => [
                 'equals' => [
-                    'display' => 'Equals',
+                    'display' => 'Égal à',
                     'operator' => '=',
                 ],
                 'not_equals' => [
-                    'display' => 'Not Equals',
+                    'display' => 'Différent de',
                     'operator' => '!=',
                 ],
                 'contains' => [
-                    'display' => 'Contains',
+                    'display' => 'Contient',
                     'operator' => 'LIKE',
                     'value_modifier' => function ($value) {
                         return '%' . $value . '%';
                     },
                 ],
                 'starts_with' => [
-                    'display' => 'Starts With',
+                    'display' => 'Commence par',
                     'operator' => 'LIKE',
                     'value_modifier' => function ($value) {
                         return $value . '%';
                     },
                 ],
                 'ends_with' => [
-                    'display' => 'Ends With',
+                    'display' => 'Finit par',
                     'operator' => 'LIKE',
                     'value_modifier' => function ($value) {
                         return '%' . $value;
                     },
                 ],
                 'is_null' => [
-                    'display' => 'Is Empty',
+                    'display' => 'Est vide',
                     'operator' => 'IS',
                     'value' => null,
                 ],
                 'is_not_null' => [
-                    'display' => 'Is Not Empty',
+                    'display' => 'N\'est pas vide',
                     'operator' => 'IS NOT',
                     'value' => null,
                 ],
             ],
             'integer' => [
                 'equals' => [
-                    'display' => 'Equals',
+                    'display' => 'Égal à',
                     'operator' => '=',
                 ],
                 'not_equals' => [
-                    'display' => 'Not Equals',
+                    'display' => 'Différent de',
                     'operator' => '!=',
                 ],
                 'greater_than' => [
-                    'display' => 'Greater Than',
+                    'display' => 'Supérieur à',
                     'operator' => '>',
                 ],
                 'greater_than_or_equal' => [
-                    'display' => 'Greater Than or Equal',
+                    'display' => 'Supérieur ou égal à',
                     'operator' => '>=',
                 ],
                 'less_than' => [
-                    'display' => 'Less Than',
+                    'display' => 'Inférieur à',
                     'operator' => '<',
                 ],
                 'less_than_or_equal' => [
-                    'display' => 'Less Than or Equal',
+                    'display' => 'Inférieur ou égal à',
                     'operator' => '<=',
                 ],
                 'is_null' => [
-                    'display' => 'Is Empty',
+                    'display' => 'Est vide',
                     'operator' => 'IS',
                     'value' => null,
                 ],
                 'is_not_null' => [
-                    'display' => 'Is Not Empty',
+                    'display' => 'N\'est pas vide',
                     'operator' => 'IS NOT',
                     'value' => null,
                 ],
             ],
             'boolean' => [
                 'equals' => [
-                    'display' => 'Equals',
+                    'display' => 'Est vrai',
                     'operator' => '=',
+                    'value_modifier' => function ($value) {
+                        return $value == '1' || $value == 'true' || $value === true ? 1 : 0;
+                    },
                 ],
                 'not_equals' => [
-                    'display' => 'Not Equals',
-                    'operator' => '!=',
+                    'display' => 'Est faux',
+                    'operator' => '=',
+                    'value_modifier' => function ($value) {
+                        return $value == '1' || $value == 'true' || $value === true ? 0 : 1;
+                    },
                 ],
             ],
             'datetime' => [
                 'equals' => [
-                    'display' => 'Equals',
+                    'display' => 'Égal à',
                     'operator' => '=',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'not_equals' => [
-                    'display' => 'Not Equals',
+                    'display' => 'Différent de',
                     'operator' => '!=',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'greater_than' => [
-                    'display' => 'After',
+                    'display' => 'Après',
                     'operator' => '>',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'less_than' => [
-                    'display' => 'Before',
+                    'display' => 'Avant',
                     'operator' => '<',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'is_null' => [
-                    'display' => 'Is Empty',
+                    'display' => 'Est vide',
                     'operator' => 'IS',
                     'value' => null,
                 ],
                 'is_not_null' => [
-                    'display' => 'Is Not Empty',
+                    'display' => 'N\'est pas vide',
                     'operator' => 'IS NOT',
                     'value' => null,
                 ],
             ],
             'date' => [
                 'equals' => [
-                    'display' => 'Equals',
+                    'display' => 'Égal à',
                     'operator' => '=',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'not_equals' => [
-                    'display' => 'Not Equals',
+                    'display' => 'Différent de',
                     'operator' => '!=',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'greater_than' => [
-                    'display' => 'After',
+                    'display' => 'Après',
                     'operator' => '>',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'less_than' => [
-                    'display' => 'Before',
+                    'display' => 'Avant',
                     'operator' => '<',
                     'value_modifier' => function ($value) {
                         return date('Y-m-d', strtotime($value));
                     },
                 ],
                 'is_null' => [
-                    'display' => 'Is Empty',
+                    'display' => 'Est vide',
                     'operator' => 'IS',
                     'value' => null,
                 ],
                 'is_not_null' => [
-                    'display' => 'Is Not Empty',
+                    'display' => 'N\'est pas vide',
                     'operator' => 'IS NOT',
                     'value' => null,
                 ],
             ],
             'default' => [
                 'equals' => [
-                    'display' => 'Equals',
+                    'display' => 'Égal à',
                     'operator' => '=',
                 ],
                 'not_equals' => [
-                    'display' => 'Not Equals',
+                    'display' => 'Différent de',
                     'operator' => '!=',
                 ],
                 'is_null' => [
-                    'display' => 'Is Empty',
+                    'display' => 'Est vide',
                     'operator' => 'IS',
                     'value' => null,
                 ],
                 'is_not_null' => [
-                    'display' => 'Is Not Empty',
+                    'display' => 'N\'est pas vide',
                     'operator' => 'IS NOT',
                     'value' => null,
                 ],
@@ -301,17 +320,40 @@ trait Filterable
         }
 
         $operators = self::getFilterOperators();
+        $customAttributes = method_exists(static::class, 'getCustomFilterableAttributes')
+            ? static::getCustomFilterableAttributes()
+            : [];
 
         foreach ($filters as $filter) {
-            if (!isset($filter['field'], $filter['operator'], $filter['value'])) {
+            if (
+                !isset($filter['field'], $filter['operator'], $filter['value']) &&
+                !in_array($filter['operator'], ['is_null', 'is_not_null'])
+            ) {
                 continue;
             }
 
             $field = $filter['field'];
             $operatorKey = $filter['operator'];
-            $value = $filter['value'];
+            $value = $filter['value'] ?? null;
 
-            // Get the field type
+            // Handle custom relationship fields
+            if (isset($customAttributes[$field])) {
+                $customAttr = $customAttributes[$field];
+
+                if (isset($customAttr['relation']) && isset($customAttr['relation_column'])) {
+                    self::applyRelationFilter(
+                        $query,
+                        $customAttr['relation'],
+                        $customAttr['relation_column'],
+                        $operatorKey,
+                        $value,
+                        $customAttr['type']
+                    );
+                    continue;
+                }
+            }
+
+            // Get the field type and operators
             $attributes = self::getFilterableAttributes();
             if (!isset($attributes[$field])) {
                 continue;

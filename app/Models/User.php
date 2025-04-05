@@ -4,7 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,7 +20,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -111,7 +113,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static Builder|User whereProfessionDetails($value)
  * @mixin \Eloquent
  */
-class User extends Authenticatable implements ReportableModel
+class User extends Authenticatable implements ReportableModel, FilterableModel
 {
     use HasApiTokens;
     use HasFactory;
@@ -119,6 +121,7 @@ class User extends Authenticatable implements ReportableModel
     use Notifiable;
     use TwoFactorAuthenticatable;
     use Reportable;
+    use Filterable;
 
     /**
      * The attributes that are mass assignable.
@@ -151,6 +154,7 @@ class User extends Authenticatable implements ReportableModel
         'dateOfBirth' => 'datetime',
         'arrivalDate' => 'datetime',
         'isActive' => 'boolean',
+        'isDisciplined' => 'boolean',
     ];
 
     /**
@@ -249,6 +253,125 @@ class User extends Authenticatable implements ReportableModel
                             ->orWhere("email", "like", '%' . $search . '%');
                     });
             });
+    }
+
+    /**
+     * Get the filterable attributes for this model.
+     *
+     * @return array
+     */
+    public static function getFilterableAttributes(): array
+    {
+        return [
+            'id' => [
+                'name' => 'id',
+                'display_name' => 'ID',
+                'type' => 'integer',
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than'],
+            ],
+            'name' => [
+                'name' => 'name',
+                'display_name' => 'Nom',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'starts_with', 'ends_with'],
+            ],
+            'surname' => [
+                'name' => 'surname',
+                'display_name' => 'Prénom',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'starts_with', 'ends_with', 'is_null', 'is_not_null'],
+            ],
+            'email' => [
+                'name' => 'email',
+                'display_name' => 'Email',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'ends_with'],
+            ],
+            'gender' => [
+                'name' => 'gender',
+                'display_name' => 'Genre',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals'],
+            ],
+            'dateOfBirth' => [
+                'name' => 'dateOfBirth',
+                'display_name' => 'Date de naissance',
+                'type' => 'date',
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'is_null', 'is_not_null'],
+            ],
+            'residence' => [
+                'name' => 'residence',
+                'display_name' => 'Résidence',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'phoneNumber' => [
+                'name' => 'phoneNumber',
+                'display_name' => 'Numéro de téléphone',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'isActive' => [
+                'name' => 'isActive',
+                'display_name' => 'Actif',
+                'type' => 'boolean',
+                'operators' => ['equals', 'not_equals'],
+            ],
+            'isDisciplined' => [
+                'name' => 'isDisciplined',
+                'display_name' => 'Discipliné',
+                'type' => 'boolean',
+                'operators' => ['equals', 'not_equals'],
+            ],
+            'arrivalDate' => [
+                'name' => 'arrivalDate',
+                'display_name' => 'Date d\'arrivée',
+                'type' => 'date',
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'is_null', 'is_not_null'],
+            ],
+            'maritalStatus' => [
+                'name' => 'maritalStatus',
+                'display_name' => 'Statut marital',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'is_null', 'is_not_null'],
+            ],
+            'numberOfChildren' => [
+                'name' => 'numberOfChildren',
+                'display_name' => 'Nombre d\'enfants',
+                'type' => 'integer',
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_than_or_equal', 'less_than_or_equal'],
+            ],
+            'profession' => [
+                'name' => 'profession',
+                'display_name' => 'Profession',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'profession_details' => [
+                'name' => 'profession_details',
+                'display_name' => 'Détails de profession',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'assembly_id' => [
+                'name' => 'assembly_id',
+                'display_name' => 'Assemblée',
+                'type' => 'integer',
+                'operators' => ['equals', 'not_equals', 'is_null', 'is_not_null'],
+            ],
+            'created_at' => [
+                'name' => 'created_at',
+                'display_name' => 'Date de création',
+                'type' => 'datetime',
+                'operators' => ['greater_than', 'less_than'],
+            ],
+            'updated_at' => [
+                'name' => 'updated_at',
+                'display_name' => 'Date de mise à jour',
+                'type' => 'datetime',
+                'operators' => ['greater_than', 'less_than'],
+            ],
+        ];
     }
 
     /**

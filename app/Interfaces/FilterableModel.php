@@ -2,6 +2,8 @@
 
 namespace App\Interfaces;
 
+use Illuminate\Database\Eloquent\Builder;
+
 interface FilterableModel
 {
     /**
@@ -25,5 +27,5 @@ interface FilterableModel
      * @param array $filters
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function applyDynamicFilters($query, array $filters);
+    public static function applyDynamicFilters(Builder $query, array $filters);
 }

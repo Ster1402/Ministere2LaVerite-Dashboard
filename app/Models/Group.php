@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Traits\Reportable;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -31,10 +33,11 @@ use App\Traits\Reportable;
  * @method static Builder|Group whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Group extends Model implements ReportableModel
+class Group extends Model implements ReportableModel, FilterableModel
 {
     use HasFactory;
     use Reportable;
+    use Filterable;
 
     protected $fillable = [
         'name',
@@ -161,5 +164,148 @@ class Group extends Model implements ReportableModel
     {
         return self::with(['resources'])
             ->withCount('resources');
+    }
+
+    /**
+     * Get the filterable attributes for this model.
+     *
+     * @return array
+     */
+    public static function getFilterableAttributes(): array
+    {
+        return [
+            'id' => [
+                'name' => 'id',
+                'display_name' => 'ID',
+                'type' => 'integer',
+                'operators' => ['equals', 'not_equals', 'greater_than', 'less_than'],
+            ],
+            'name' => [
+                'name' => 'name',
+                'display_name' => 'Nom du groupe',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'starts_with', 'ends_with'],
+            ],
+            'description' => [
+                'name' => 'description',
+                'display_name' => 'Description',
+                'type' => 'string',
+                'operators' => ['equals', 'not_equals', 'contains', 'is_null', 'is_not_null'],
+            ],
+            'resources_count' => [
+                'name' => 'resources_count',
+                'display_name' => 'Nombre de ressources',
+                'type' => 'integer',
+                'operators' => ['equals', 'greater_than', 'less_than'],
+                'custom_query' => true,
+            ],
+            'total_resource_quantity' => [
+                'name' => 'total_resource_quantity',
+                'display_name' => 'Quantité totale de ressources',
+                'type' => 'integer',
+                'operators' => ['greater_than', 'less_than'],
+                'custom_query' => true,
+            ],
+            'created_at' => [
+                'name' => 'created_at',
+                'display_name' => 'Date de création',
+                'type' => 'datetime',
+                'operators' => ['greater_than', 'less_than'],
+            ],
+            'updated_at' => [
+                'name' => 'updated_at',
+                'display_name' => 'Date de mise à jour',
+                'type' => 'datetime',
+                'operators' => ['greater_than', 'less_than'],
+            ],
+        ];
+    }
+
+    /**
+     * Apply dynamic filters specific to this model.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $filters
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function applyDynamicFilters($query, array $filters)
+    {
+        foreach ($filters as $filter) {
+            if (
+                !isset($filter['field'], $filter['operator'], $filter['value']) &&
+                !in_array($filter['operator'], ['is_null', 'is_not_null'])
+            ) {
+                continue;
+            }
+
+            // Handle custom filters
+            if ($filter['field'] === 'resources_count') {
+                $query = self::applyResourcesCountFilter($query, $filter['operator'], $filter['value']);
+                continue;
+            }
+
+            if ($filter['field'] === 'total_resource_quantity') {
+                $query = self::applyTotalResourceQuantityFilter($query, $filter['operator'], $filter['value']);
+                continue;
+            }
+        }
+
+        // Apply standard filters from the Filterable trait
+        return parent::applyDynamicFilters($query, $filters);
+    }
+
+    /**
+     * Apply filter for resources count.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $operator
+     * @param int $value
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private static function applyResourcesCountFilter($query, string $operator, $value)
+    {
+        $value = intval($value);
+
+        switch ($operator) {
+            case 'equals':
+                return $query->withCount('resources')->having('resources_count', '=', $value);
+            case 'greater_than':
+                return $query->withCount('resources')->having('resources_count', '>', $value);
+            case 'less_than':
+                return $query->withCount('resources')->having('resources_count', '<', $value);
+            default:
+                return $query;
+        }
+    }
+
+    /**
+     * Apply filter for total resource quantity.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $operator
+     * @param int $value
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private static function applyTotalResourceQuantityFilter($query, string $operator, $value)
+    {
+        $value = intval($value);
+
+        // We need to use a subquery here
+        switch ($operator) {
+            case 'greater_than':
+                return $query->whereHas('resources', function ($q) use ($value) {
+                    $q->selectRaw('SUM(quantity) as total_quantity')
+                        ->groupBy('group_id')
+                        ->havingRaw('SUM(quantity) > ?', [$value]);
+                });
+            case 'less_than':
+                return $query->whereHas('resources', function ($q) use ($value) {
+                    $q->selectRaw('SUM(quantity) as total_quantity')
+                        ->groupBy('group_id')
+                        ->havingRaw('SUM(quantity) < ?', [$value]);
+                });
+            default:
+                return $query;
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,9 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Reportable;
+use App\Traits\Filterable;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -35,10 +37,11 @@ use App\Traits\Reportable;
  * @method static Builder|Sector whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Sector extends Model implements ReportableModel
+class Sector extends Model implements ReportableModel, FilterableModel
 {
     use HasFactory;
     use Reportable;
+    use Filterable;
 
     protected $guarded = ['id'];
     protected $with = ['master'];

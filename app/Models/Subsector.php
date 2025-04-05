@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Interfaces\FilterableModel;
 use App\Interfaces\ReportableModel;
 use App\Traits\Reportable;
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * 
+ *
  *
  * @property-read \App\Models\Sector|null $master
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Sector> $subsectors
@@ -18,9 +20,10 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static Builder|Subsector query()
  * @mixin \Eloquent
  */
-class Subsector extends Sector implements ReportableModel
+class Subsector extends Sector implements ReportableModel, FilterableModel
 {
     use Reportable;
+    use Filterable;
 
     /**
      * Get reportable columns specifically for sub-sectors.
